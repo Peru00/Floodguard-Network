@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('last_name', 50);
             $table->string('email', 100)->unique();
             $table->string('password');
-            $table->string('phone', 20);
+            $table->string('phone', 50);
             $table->enum('role', ['admin', 'volunteer', 'donor']);
             $table->string('profile_image')->nullable();
             $table->datetime('registration_date')->default(now());

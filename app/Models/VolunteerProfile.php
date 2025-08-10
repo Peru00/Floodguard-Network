@@ -31,11 +31,4 @@ class VolunteerProfile extends Model
     {
         return $this->belongsTo(User::class, 'volunteer_id', 'user_id');
     }
-}space App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class VolunteerProfile extends Model
-{
-    //
 }

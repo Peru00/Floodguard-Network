@@ -42,9 +42,10 @@ class AuthController extends Controller
             // Login the user
             Auth::login($user);
             
-            return redirect()->route('dashboard');
+            // Redirect based on role
+            return $this->redirectUserToRoleDashboard($user);
         }
-
+        
         return back()->withErrors([
             'email' => 'Invalid email or password',
         ])->withInput($request->except('password'));
@@ -56,7 +57,7 @@ class AuthController extends Controller
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
             'email' => 'required|string|email|max:100|unique:users',
-            'phone' => 'required|string|max:20',
+            'phone' => 'required|string|max:50',
             'password' => 'required|string|min:6|confirmed',
             'role' => 'required|in:volunteer,donor',
             'location' => 'required_if:role,volunteer|string|max:100|nullable',
@@ -102,12 +103,28 @@ class AuthController extends Controller
         // Login the user
         Auth::login($user);
 
-        return redirect()->route('dashboard');
+        // Redirect based on role
+        return $this->redirectUserToRoleDashboard($user);
     }
 
     public function dashboard()
     {
-        return view('dashboard');
+        $user = Auth::user();
+        return $this->redirectUserToRoleDashboard($user);
+    }
+    
+    private function redirectUserToRoleDashboard($user)
+    {
+        switch($user->role) {
+            case 'donor':
+                return redirect()->route('donor.dashboard');
+            case 'volunteer':
+                return redirect()->route('dashboard')->with('message', 'Volunteer dashboard coming soon!');
+            case 'admin':
+                return redirect()->route('dashboard')->with('message', 'Admin dashboard coming soon!');
+            default:
+                return redirect()->route('dashboard');
+        }
     }
 
     public function logout()

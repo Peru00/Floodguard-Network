@@ -30,11 +30,4 @@ class DonorProfile extends Model
     {
         return $this->belongsTo(User::class, 'donor_id', 'user_id');
     }
-}space App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class DonorProfile extends Model
-{
-    //
 }

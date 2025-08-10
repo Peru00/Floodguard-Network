@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - Floodguard Network</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -146,10 +147,26 @@
                 @if(session('error') || $errors->any())
                     <div class="error-message">
                         <i class="fas fa-exclamation-circle"></i> 
-                        {{ session('error') }}
-                        @if($errors->any())
-                            {{ $errors->first() }}
+                        @if(session('error'))
+                            {{ session('error') }}<br>
                         @endif
+                        @if($errors->any())
+                            @foreach($errors->all() as $error)
+                                {{ $error }}<br>
+                            @endforeach
+                        @endif
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <div style="background-color: #d4edda; color: #155724; padding: 10px 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+                        <i class="fas fa-check-circle"></i> {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session('message'))
+                    <div style="background-color: #d1ecf1; color: #0c5460; padding: 10px 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+                        <i class="fas fa-info-circle"></i> {{ session('message') }}
                     </div>
                 @endif
                 
