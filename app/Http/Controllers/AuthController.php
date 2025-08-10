@@ -17,15 +17,23 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    public function showSignup()
+    {
+        return view('auth.signup');
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
+            'role' => 'required|in:admin,volunteer,donor'
         ]);
 
-        // Try to find user by email
-        $user = User::where('email', $credentials['email'])->first();
+        // Try to find user by email and role
+        $user = User::where('email', $credentials['email'])
+                   ->where('role', $credentials['role'])
+                   ->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
             // Update last login
@@ -38,7 +46,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Invalid email or password',
         ])->withInput($request->except('password'));
     }
 

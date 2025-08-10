@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Floodguard Network</title>
+    <title>Sign Up - Floodguard Network</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -87,8 +87,6 @@
         
         .toggle-auth a {
             color: var(--secondary-color);
-        .toggle-auth a {
-            color: var(--secondary-color);
             text-decoration: none;
             font-weight: 500;
         }
@@ -116,6 +114,10 @@
             margin-bottom: 20px;
             text-align: center;
         }
+        
+        #location-group {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -137,54 +139,93 @@
         </nav>
     </header>
 
-    <!-- Login Section -->
-    <section id="login-section" class="auth-section">
+    <!-- Signup Section -->
+    <section id="signup-section" class="auth-section">
         <div class="auth-container">
             <div class="auth-form glass fade-in">
-                <h2>Login</h2>
+                <h2>Sign Up</h2>
                 
                 @if(session('error') || $errors->any())
                     <div class="error-message">
                         <i class="fas fa-exclamation-circle"></i> 
                         {{ session('error') }}
-                        @if($errors->any())
-                            {{ $errors->first() }}
-                        @endif
+                        @foreach($errors->all() as $error)
+                            {{ $error }}<br>
+                        @endforeach
                     </div>
                 @endif
                 
-                <form action="{{ route('login.submit') }}" method="POST">
+                <form action="{{ route('signup.submit') }}" method="POST">
                     @csrf
                     <div class="form-group">
-                        <label for="login-email">Email</label>
-                        <input type="email" id="login-email" name="email" value="{{ old('email') }}" placeholder="Enter your email" required>
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" placeholder="Enter your first name" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="login-role">Role</label>
-                        <select id="login-role" name="role" required>
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" placeholder="Enter your last name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" name="email" value="{{ old('email') }}" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone" value="{{ old('phone') }}" placeholder="Enter your phone number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password_confirmation">Confirm Password</label>
+                        <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Confirm your password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signup-role">Role</label>
+                        <select id="signup-role" name="role" onchange="toggleLocationInput()" required>
                             <option value="">Select Role</option>
-                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="volunteer" {{ old('role') == 'volunteer' ? 'selected' : '' }}>Volunteer</option>
                             <option value="donor" {{ old('role') == 'donor' ? 'selected' : '' }}>Donor</option>
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <div class="form-group" id="location-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" value="{{ old('location') }}" placeholder="Enter your location (for volunteers)">
                     </div>
                     
                     <div class="submit-container">
-                        <button type="submit" class="btn-submit">Login</button>
+                        <button type="submit" class="btn-submit">Sign Up</button>
                     </div>
                     
                     <div class="toggle-auth">
-                        Don't have an account? <a href="{{ route('signup') }}">Sign Up</a>
+                        Already have an account? <a href="{{ route('login') }}">Login</a>
                     </div>
                 </form>
             </div>
         </div>
     </section>
+
+    <script>
+        function toggleLocationInput() {
+            const roleSelect = document.getElementById('signup-role');
+            const locationGroup = document.getElementById('location-group');
+            locationGroup.style.display = roleSelect.value === 'volunteer' ? 'block' : 'none';
+        }
+
+        // Show location field if volunteer role was previously selected
+        @if(old('role') === 'volunteer')
+            document.addEventListener('DOMContentLoaded', function() {
+                toggleLocationInput();
+            });
+        @endif
+    </script>
 </body>
 </html>
