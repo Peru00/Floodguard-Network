@@ -14,6 +14,35 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15) !important;
         }
         
+        /* Alert Messages */
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            font-size: 0.95rem;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        
+        .alert-error,
+        .alert-danger {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .text-danger {
+            color: #dc3545 !important;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
+        }
+        
         .navbar .logo h1 {
             font-size: 1.8rem !important;
             font-weight: 600 !important;
@@ -360,48 +389,91 @@
                 <h1>Victim Management</h1>
             </div>
             
+            <!-- Success/Error Messages -->
+            @if(session('success'))
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> {{ session('success') }}
+                </div>
+            @endif
+            
+            @if(session('error'))
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+                </div>
+            @endif
+            
+            @if ($errors->any())
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Please fix the following errors:</strong>
+                    <ul style="margin: 10px 0 0 20px;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            
             <!-- Add New Victim Form -->
             <div class="form-container">
                 <div class="form-header">
                     <h2><i class="fas fa-plus-circle"></i> Add New Victim</h2>
                 </div>
                 
-                <form id="victimForm">
+                <form id="victimForm" action="{{ route('volunteer.victims.store') }}" method="POST">
                     @csrf
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="victimName">Full Name</label>
-                            <input type="text" id="victimName" name="name" placeholder="Enter victim's name" required>
+                            <input type="text" id="victimName" name="name" placeholder="Enter victim's name" required value="{{ old('name') }}">
+                            @error('name')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         
                         <div class="form-group">
                             <label for="familySize">Family Size</label>
-                            <input type="number" id="familySize" name="family_size" min="1" placeholder="Number of members">
+                            <input type="number" id="familySize" name="family_size" min="1" placeholder="Number of members" value="{{ old('family_size') }}">
+                            @error('family_size')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         
                         <div class="form-group">
                             <label for="phoneNumber">Contact Number</label>
-                            <input type="tel" id="phoneNumber" name="contact_info" placeholder="Phone number">
+                            <input type="tel" id="phoneNumber" name="contact_info" placeholder="Phone number" value="{{ old('contact_info') }}">
+                            @error('contact_info')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         
                         <div class="form-group">
                             <label for="location">Location</label>
-                            <input type="text" id="location" name="location" placeholder="Enter location">
+                            <input type="text" id="location" name="location" placeholder="Enter location" required value="{{ old('location') }}">
+                            @error('location')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         
                         <div class="form-group">
                             <label for="priority">Priority Level</label>
                             <select id="priority" name="priority">
                                 <option value="">Select priority</option>
-                                <option value="high">High (Immediate)</option>
-                                <option value="medium">Medium (24hrs)</option>
-                                <option value="low">Low (Stable)</option>
+                                <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>High (Immediate)</option>
+                                <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>Medium (24hrs)</option>
+                                <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>Low (Stable)</option>
                             </select>
+                            @error('priority')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         
                         <div class="form-group">
                             <label for="needs">Needs</label>
-                            <input type="text" id="needs" name="special_needs" placeholder="Food, Water, Shelter, Medical">
+                            <input type="text" id="needs" name="special_needs" placeholder="Food, Water, Shelter, Medical" required value="{{ old('special_needs') }}">
+                            @error('special_needs')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         
                         <div class="form-actions">
@@ -443,8 +515,8 @@
                                             {{ ucfirst($victim->priority ?? 'Low') }}
                                         </span>
                                     </td>
-                                    <td>{{ $victim->special_needs ?? $victim->medical_condition ?? 'General assistance' }}</td>
-                                    <td>{{ $victim->contact_info ?? 'No contact info' }}</td>
+                                    <td>{{ $victim->needs ?? 'General assistance' }}</td>
+                                    <td>{{ $victim->phone ?? 'No contact info' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -490,17 +562,5 @@
             </div>
         </main>
     </div>
-    
-    <script>
-        // Form submission
-        document.getElementById('victimForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Here you would normally submit the form data to the server
-            alert('Victim record saved successfully!');
-            this.reset();
-            
-            // In a real application, you would refresh the victims list or add the new victim to the table
-        });
-    </script>
 </body>
 </html>

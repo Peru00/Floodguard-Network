@@ -249,7 +249,7 @@ class VolunteerController extends Controller
         return view('volunteer.distribution-repository', compact('distributions'));
     }
     
-    public function inventory()
+    public function inventory(Request $request)
     {
         $user = Auth::user();
         
@@ -257,13 +257,121 @@ class VolunteerController extends Controller
             return redirect()->route('login')->with('error', 'Volunteer access required');
         }
         
-        // Get all inventory items
-        $inventoryItems = DB::table('inventory')
-            ->select('*')
-            ->orderBy('item_name')
-            ->paginate(15);
+        // Get filter parameters
+        $filter = $request->get('filter');
+        $search = $request->get('search');
+        
+        // Build query
+        $query = DB::table('inventory')->select('*');
+        
+        // Apply filters
+        if ($filter) {
+            switch ($filter) {
+                case 'low_stock':
+                    $query->where('quantity', '<=', 50)->where('quantity', '>', 0);
+                    break;
+                case 'out_of_stock':
+                    $query->where('quantity', '<=', 0);
+                    break;
+                case 'good_stock':
+                    $query->where('quantity', '>', 50);
+                    break;
+                case 'food':
+                    $query->where('item_type', 'food');
+                    break;
+                case 'clothing':
+                    $query->where('item_type', 'clothing');
+                    break;
+                case 'medical':
+                    $query->where('item_type', 'medical');
+                    break;
+            }
+        }
+        
+        // Apply search
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('item_name', 'like', '%' . $search . '%')
+                  ->orWhere('item_description', 'like', '%' . $search . '%');
+            });
+        }
+        
+        $inventoryItems = $query->orderBy('item_name')->paginate(15);
         
         return view('volunteer.inventory', compact('inventoryItems'));
+    }
+    
+    public function storeInventory(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'volunteer') {
+            return redirect()->route('login')->with('error', 'Volunteer access required');
+        }
+        
+        // Validate the request
+        $request->validate([
+            'item_name' => 'required|string|max:255',
+            'item_type' => 'required|in:food,clothing,medical,other',
+            'quantity' => 'required|integer|min:1',
+            'item_description' => 'nullable|string',
+            'expiry_date' => 'nullable|date|after:today'
+        ]);
+        
+        try {
+            // Generate inventory ID
+            $lastItem = DB::table('inventory')
+                ->whereRaw('inventory_id REGEXP "^[0-9]+$"')
+                ->orderByRaw('CAST(inventory_id AS UNSIGNED) DESC')
+                ->first();
+            
+            $nextId = $lastItem ? (intval($lastItem->inventory_id) + 1) : 1;
+            
+            // Insert new inventory item
+            DB::table('inventory')->insert([
+                'inventory_id' => (string)$nextId,
+                'item_name' => $request->item_name,
+                'item_type' => $request->item_type,
+                'quantity' => $request->quantity,
+                'item_description' => $request->item_description,
+                'expiry_date' => $request->expiry_date,
+                'status' => 'available',
+                'added_date' => now(),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            
+            return redirect()->route('volunteer.inventory')->with('success', 'Inventory item added successfully!');
+            
+        } catch (\Exception $e) {
+            return redirect()->route('volunteer.inventory')->with('error', 'Failed to add inventory item. Please try again.');
+        }
+    }
+    
+    public function deleteInventory($id)
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'volunteer') {
+            return redirect()->route('login')->with('error', 'Volunteer access required');
+        }
+        
+        try {
+            // Check if item exists
+            $item = DB::table('inventory')->where('inventory_id', $id)->first();
+            
+            if (!$item) {
+                return redirect()->route('volunteer.inventory')->with('error', 'Inventory item not found.');
+            }
+            
+            // Delete the item
+            DB::table('inventory')->where('inventory_id', $id)->delete();
+            
+            return redirect()->route('volunteer.inventory')->with('success', 'Inventory item deleted successfully!');
+            
+        } catch (\Exception $e) {
+            return redirect()->route('volunteer.inventory')->with('error', 'Failed to delete inventory item. Please try again.');
+        }
     }
     
     public function victims()
@@ -282,5 +390,54 @@ class VolunteerController extends Controller
             ->paginate(15);
         
         return view('volunteer.victims', compact('victims'));
+    }
+    
+    public function storeVictim(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'volunteer') {
+            return redirect()->route('login')->with('error', 'Volunteer access required');
+        }
+        
+        // Validate the request
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'family_size' => 'nullable|integer|min:1',
+            'contact_info' => 'nullable|string|max:15',
+            'location' => 'required|string|max:100',
+            'priority' => 'nullable|in:high,medium,low',
+            'special_needs' => 'required|string|max:255'
+        ]);
+        
+        try {
+            // Generate victim ID - get the last numeric part and increment
+            $lastVictim = DB::table('victims')
+                ->whereRaw('victim_id REGEXP "^[0-9]+$"')
+                ->orderByRaw('CAST(victim_id AS UNSIGNED) DESC')
+                ->first();
+            
+            $nextId = $lastVictim ? (intval($lastVictim->victim_id) + 1) : 1;
+            
+            // Insert new victim
+            DB::table('victims')->insert([
+                'victim_id' => (string)$nextId,
+                'name' => $request->name,
+                'family_size' => $request->family_size ?? 1,
+                'phone' => $request->contact_info,
+                'location' => $request->location,
+                'priority' => $request->priority ?? 'low',
+                'needs' => $request->special_needs,
+                'status' => 'pending',
+                'registration_date' => now(),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            
+            return redirect()->route('volunteer.victims')->with('success', 'Victim record added successfully!');
+            
+        } catch (\Exception $e) {
+            return redirect()->route('volunteer.victims')->with('error', 'Failed to add victim record. Please try again.');
+        }
     }
 }

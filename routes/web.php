@@ -46,6 +46,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/profile/update', [App\Http\Controllers\VolunteerController::class, 'updateProfile'])->name('update-profile');
         Route::get('/distribution-repository', [App\Http\Controllers\VolunteerController::class, 'distributionRepository'])->name('distribution-repository');
         Route::get('/inventory', [App\Http\Controllers\VolunteerController::class, 'inventory'])->name('inventory');
+        Route::post('/inventory', [App\Http\Controllers\VolunteerController::class, 'storeInventory'])->name('inventory.store');
+        Route::delete('/inventory/{id}', [App\Http\Controllers\VolunteerController::class, 'deleteInventory'])->name('inventory.delete');
         Route::get('/victims', [App\Http\Controllers\VolunteerController::class, 'victims'])->name('victims');
+        Route::post('/victims', [App\Http\Controllers\VolunteerController::class, 'storeVictim'])->name('victims.store');
     });
 });

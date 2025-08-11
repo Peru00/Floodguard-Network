@@ -14,6 +14,120 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15) !important;
         }
         
+        /* Alert Messages */
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            font-size: 0.95rem;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        
+        .alert-error,
+        .alert-danger {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .text-danger {
+            color: #dc3545 !important;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+        
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        /* Filter Dropdown */
+        .filter-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .filter-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            z-index: 1;
+            border: 1px solid #ddd;
+        }
+        
+        .filter-content.show {
+            display: block;
+        }
+        
+        .filter-content a {
+            color: #333;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .filter-content a:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .filter-content a:last-child {
+            border-bottom: none;
+        }
+        
         .navbar .logo h1 {
             font-size: 1.8rem !important;
             font-weight: 600 !important;
@@ -309,13 +423,38 @@
     <!-- Main Content -->
     <div class="admin-container">
         <main class="main-content">
+            <!-- Success/Error Messages -->
+            @if(session('success'))
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> {{ session('success') }}
+                </div>
+            @endif
+            
+            @if(session('error'))
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+                </div>
+            @endif
+            
             <!-- Inventory Management Section -->
             <section class="inventory-section">
                 <div class="section-header">
                     <h2><i class="fas fa-boxes"></i> Relief Inventory Management</h2>
                     <div class="section-actions">
-                        <button class="btn btn-primary"><i class="fas fa-plus"></i> Add Item</button>
-                        <button class="btn btn-secondary"><i class="fas fa-filter"></i> Filter</button>
+                        <button class="btn btn-primary" onclick="openAddItemModal()"><i class="fas fa-plus"></i> Add Item</button>
+                        <div class="filter-dropdown">
+                            <button class="btn btn-secondary" onclick="toggleFilterDropdown()"><i class="fas fa-filter"></i> Filter</button>
+                            <div id="filterDropdown" class="filter-content">
+                                <a href="{{ route('volunteer.inventory') }}">All Items</a>
+                                <a href="{{ route('volunteer.inventory', ['filter' => 'good_stock']) }}">Good Stock (>50)</a>
+                                <a href="{{ route('volunteer.inventory', ['filter' => 'low_stock']) }}">Low Stock (1-50)</a>
+                                <a href="{{ route('volunteer.inventory', ['filter' => 'out_of_stock']) }}">Out of Stock</a>
+                                <hr style="margin: 5px 0; border: none; border-top: 1px solid #eee;">
+                                <a href="{{ route('volunteer.inventory', ['filter' => 'food']) }}">Food Items</a>
+                                <a href="{{ route('volunteer.inventory', ['filter' => 'clothing']) }}">Clothing</a>
+                                <a href="{{ route('volunteer.inventory', ['filter' => 'medical']) }}">Medical Supplies</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -385,7 +524,11 @@
                                             @endif
                                         </td>
                                         <td class="actions">
-                                            <button class="action-btn delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                                            <form method="POST" action="{{ route('volunteer.inventory.delete', $item->inventory_id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this item?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="action-btn delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                                            </form>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -407,5 +550,158 @@
             </section>
         </main>
     </div>
+    
+    <!-- Add Item Modal -->
+    <div id="addItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus-circle"></i> Add New Inventory Item</h3>
+                <span class="close" onclick="closeAddItemModal()">&times;</span>
+            </div>
+            
+            <form action="{{ route('volunteer.inventory.store') }}" method="POST">
+                @csrf
+                <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="itemName">Item Name</label>
+                        <input type="text" id="itemName" name="item_name" placeholder="Enter item name" required value="{{ old('item_name') }}">
+                        @error('item_name')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemType">Item Type</label>
+                        <select id="itemType" name="item_type" required>
+                            <option value="">Select item type</option>
+                            <option value="food" {{ old('item_type') == 'food' ? 'selected' : '' }}>Food</option>
+                            <option value="clothing" {{ old('item_type') == 'clothing' ? 'selected' : '' }}>Clothing</option>
+                            <option value="medical" {{ old('item_type') == 'medical' ? 'selected' : '' }}>Medical</option>
+                            <option value="other" {{ old('item_type') == 'other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                        @error('item_type')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <input type="number" id="quantity" name="quantity" min="1" placeholder="Enter quantity" required value="{{ old('quantity') }}">
+                        @error('quantity')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="unit">Unit</label>
+                        <input type="text" id="unit" name="unit" placeholder="e.g., pieces, kg, liters" value="{{ old('unit', 'units') }}">
+                        @error('unit')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemDescription">Description (Optional)</label>
+                        <textarea id="itemDescription" name="item_description" placeholder="Enter item description" rows="3">{{ old('item_description') }}</textarea>
+                        @error('item_description')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expiryDate">Expiry Date (Optional)</label>
+                        <input type="date" id="expiryDate" name="expiry_date" min="{{ date('Y-m-d', strtotime('+1 day')) }}" value="{{ old('expiry_date') }}">
+                        @error('expiry_date')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddItemModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Item</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <style>
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+    </style>
+    
+    <script>
+        // Modal functions
+        function openAddItemModal() {
+            document.getElementById('addItemModal').style.display = 'block';
+        }
+        
+        function closeAddItemModal() {
+            document.getElementById('addItemModal').style.display = 'none';
+        }
+        
+        // Filter dropdown
+        function toggleFilterDropdown() {
+            document.getElementById("filterDropdown").classList.toggle("show");
+        }
+        
+        // Close dropdown when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.matches('.btn')) {
+                var dropdowns = document.getElementsByClassName("filter-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+            
+            // Close modal when clicking outside
+            if (event.target.classList.contains('modal')) {
+                closeAddItemModal();
+            }
+        }
+        
+        // Auto-open modal if there are validation errors
+        @if ($errors->any())
+            window.onload = function() {
+                openAddItemModal();
+            };
+        @endif
+    </script>
 </body>
 </html>
