@@ -33,6 +33,8 @@ class Donation extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'donation_date' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function donor()

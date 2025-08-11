@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/submit-donation', [DonorController::class, 'submitDonation'])->name('submit-donation');
         Route::get('/donations', [DonorController::class, 'donations'])->name('donations');
         Route::get('/donation/{id}', [DonorController::class, 'viewDonation'])->name('view-donation');
-        Route::get('/distribution-repository', [DonorController::class, 'distributionRepository'])->name('distribution');
+        Route::get('/distribution-repository', [DonorController::class, 'distributionRepository'])->name('distribution-repository');
         Route::get('/profile/edit', [DonorController::class, 'editProfile'])->name('edit-profile');
         Route::post('/profile/update', [DonorController::class, 'updateProfile'])->name('update-profile');
     });

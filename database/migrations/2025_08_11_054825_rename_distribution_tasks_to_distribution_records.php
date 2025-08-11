@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Drop the empty distribution_tasks table
+        Schema::dropIfExists('distribution_tasks');
+        
+        // Create the proper distribution_records table
         Schema::create('distribution_records', function (Blueprint $table) {
             $table->string('distribution_id', 50)->primary();
             $table->datetime('distribution_date')->nullable();
@@ -34,5 +38,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('distribution_records');
+        
+        // Recreate the original distribution_tasks table
+        Schema::create('distribution_tasks', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
     }
 };

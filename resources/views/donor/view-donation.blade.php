@@ -269,7 +269,7 @@
 
         <!-- Donation Details Section -->
         <div class="donation-details">
-            @if($donation->donation_type === 'monetary')
+            @if($donation->donation_type === 'money')
                 <div class="amount-highlight">
                     <div class="amount-value">৳{{ number_format($donation->amount, 2) }}</div>
                     <div class="amount-label">Monetary Donation</div>

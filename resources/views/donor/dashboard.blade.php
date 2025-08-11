@@ -59,7 +59,7 @@
         <div class="nav-links">
             <a href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Home</span></a>
             <a href="{{ route('donor.dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
-            <a href="{{ route('donor.distribution') }}"><i class="fas fa-archive"></i> <span>Distribution Repo</span></a>
+            <a href="{{ route('donor.distribution-repository') }}"><i class="fas fa-archive"></i> <span>Distribution Repo</span></a>
             <div class="admin-profile" style="cursor: pointer;" onclick="window.location.href='{{ route('donor.edit-profile') }}'">
                 <img src="{{ Auth::user()->profile_picture ? asset(Auth::user()->profile_picture) : 'https://randomuser.me/api/portraits/men/32.jpg' }}" alt="Donor">
                 <div>
@@ -154,7 +154,7 @@
                     <div class="inline-fields">
                         <div class="form-group">
                             <label>Amount (USD) *</label>
-                            <input type="number" step="0.01" name="amount_quantity" placeholder="e.g. 150" />
+                            <input type="number" step="0.01" name="money_amount" placeholder="e.g. 150" />
                         </div>
                         <div class="form-group">
                             <label>Payment Method *</label>
@@ -177,7 +177,7 @@
                     <div class="inline-fields">
                         <div class="form-group">
                             <label>Quantity *</label>
-                            <input type="text" name="amount_quantity" placeholder="e.g. 25 boxes" />
+                            <input type="text" name="item_quantity" placeholder="e.g. 25 boxes" />
                         </div>
                         <div class="form-group">
                             <label>Expiry Date <small>(Food/Medicine)</small></label>
@@ -219,13 +219,13 @@
                                 Donation {{ ucfirst($donation->status) }}
                                 <span class="status-badge status-{{ strtolower($donation->status) }}">{{ strtoupper($donation->status) }}</span>
                             </h3>
-                            <span class="notification-time">{{ optional($donation->created_at)->diffForHumans() }}</span>
+                            <span class="notification-time">{{ $donation->created_at ? $donation->created_at->diffForHumans() : $donation->donation_date->diffForHumans() }}</span>
                         </div>
                         <div class="notification-message">
                             @if($donation->donation_type === 'money')
                                 Monetary donation of ${{ number_format($donation->amount,2) }}.
                             @else
-                                {{ ucfirst($donation->donation_type) }} donation ({{ $donation->quantity ?? 'n/a' }}).
+                                {{ ucfirst($donation->donation_type) }} donation: {{ $donation->items ?? $donation->description }} (Qty: {{ $donation->quantity ?? '1' }}).
                             @endif
                         </div>
                         <a class="view-link" href="{{ route('donor.view-donation', $donation->donation_id) }}">View Details</a>
@@ -243,24 +243,48 @@
             const itemFields = document.getElementById('itemFields');
             const radios = document.querySelectorAll('input[name="donation_type"]');
             const resetBtn = document.getElementById('resetBtn');
+            const form = document.getElementById('donationForm');
+            
             function updateBlocks(){
                 let val = document.querySelector('input[name="donation_type"]:checked')?.value;
+                
+                // Hide both sections first
                 moneyFields.classList.remove('active');
                 itemFields.classList.remove('active');
-                // clear validation requirements
-                moneyFields.querySelectorAll('input,select,textarea').forEach(el=>el.required=false);
-                itemFields.querySelectorAll('input,select,textarea').forEach(el=>el.required=false);
-                if(val==='money'){
+                
+                // Clear all required attributes
+                moneyFields.querySelectorAll('input,select,textarea').forEach(el => {
+                    el.required = false;
+                    el.disabled = false; // Ensure fields are not disabled
+                });
+                itemFields.querySelectorAll('input,select,textarea').forEach(el => {
+                    el.required = false;
+                    el.disabled = false; // Ensure fields are not disabled
+                });
+                
+                if(val === 'money'){
                     moneyFields.classList.add('active');
-                    moneyFields.querySelectorAll('input,select,textarea').forEach(el=>{ if(['amount_quantity','payment_method','transaction_id'].includes(el.name)) el.required=true; });
-                } else if(val){
+                    // Set required fields for money donation
+                    const amountField = moneyFields.querySelector('input[name="money_amount"]');
+                    const methodField = moneyFields.querySelector('select[name="payment_method"]');
+                    const txField = moneyFields.querySelector('input[name="transaction_id"]');
+                    
+                    if(amountField) amountField.required = true;
+                    if(methodField) methodField.required = true;
+                    if(txField) txField.required = true;
+                } else if(val) {
                     itemFields.classList.add('active');
-                    itemFields.querySelector('input[name="amount_quantity"]').required=true;
-                    itemFields.querySelector('textarea[name="description"]').required=true;
+                    itemFields.querySelector('input[name="item_quantity"]').required = true;
+                    itemFields.querySelector('textarea[name="description"]').required = true;
+                }
                 }
             }
-            radios.forEach(r=>r.addEventListener('change',updateBlocks));
-            resetBtn.addEventListener('click',()=>{moneyFields.classList.remove('active');itemFields.classList.remove('active');});
+            
+            radios.forEach(r => r.addEventListener('change', updateBlocks));
+            resetBtn.addEventListener('click', () => {
+                moneyFields.classList.remove('active');
+                itemFields.classList.remove('active');
+            });
         })();
     </script>
 </body>

@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Drop the existing inventory table
+        Schema::dropIfExists('inventory');
+        
+        // Create the proper inventory table
         Schema::create('inventory', function (Blueprint $table) {
             $table->string('inventory_id', 20)->primary();
             $table->enum('item_type', ['food', 'clothing', 'medical', 'other']);
@@ -34,5 +38,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('inventory');
+        
+        // Recreate the old empty inventory table
+        Schema::create('inventory', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
     }
 };

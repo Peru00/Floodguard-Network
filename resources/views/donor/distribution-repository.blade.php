@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Match dashboard styling */
         .donor-container {
             max-width: 1200px;
             margin: 20px auto;
@@ -14,20 +15,36 @@
         }
         
         .page-header {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 25px;
+            margin-top: 100px;
             text-align: center;
         }
         
+        .page-header h1 {
+            font-size: 28px;
+            margin: 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .page-header p {
+            color: #666;
+            margin: 12px 0 0 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
         .distributions-container {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            border-radius: 15px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
             overflow: hidden;
         }
         
@@ -35,36 +52,97 @@
             background: var(--secondary-color);
             color: white;
             padding: 20px;
-            font-size: 1.2rem;
+            font-size: 18px;
             font-weight: 600;
             display: flex;
             align-items: center;
+            gap: 8px;
         }
         
-        .table-header i {
+        .impact-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+        
+        .stat-card {
+            background: #eef2f3;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 14px;
+            text-align: center;
+        }
+        
+        .stat-card i {
+            font-size: 18px;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #222;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: #555;
+            margin-top: 4px;
+        }
+        
+        .navbar {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .navbar .logo i {
             margin-right: 10px;
         }
         
-        .table {
-            width: 100%;
-            border-collapse: collapse;
+        .navbar .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
         }
         
-        .table th,
-        .table td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .table th {
-            background: rgba(0, 123, 255, 0.1);
-            font-weight: 600;
+        .navbar .nav-links a {
             color: var(--primary-color);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
         
-        .table tbody tr:hover {
-            background: rgba(0, 123, 255, 0.05);
+        .navbar .nav-links a:hover,
+        .navbar .nav-links a.active {
+            background: var(--secondary-color);
+            color: white;
         }
         
         .distribution-item {
@@ -129,7 +207,7 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: var(--text-secondary);
+            color: #666;
         }
         
         .empty-state i {
@@ -138,88 +216,15 @@
             margin-bottom: 20px;
         }
         
-        .navbar {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            padding: 1rem 0;
-            margin-bottom: 2rem;
+        .empty-state h3 {
+            color: #222;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
         }
         
-        .navbar .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .navbar .logo {
-            display: flex;
-            align-items: center;
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        
-        .navbar .logo i {
-            margin-right: 10px;
-        }
-        
-        .navbar .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 20px;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .navbar .nav-links a {
-            color: var(--primary-color);
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .navbar .nav-links a:hover,
-        .navbar .nav-links a.active {
-            background: var(--secondary-color);
-            color: white;
-        }
-        
-        .impact-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .stat-card i {
-            font-size: 2.5rem;
-            color: var(--secondary-color);
-            margin-bottom: 10px;
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .stat-label {
-            color: var(--text-secondary);
-            margin-top: 5px;
+        .empty-state p {
+            color: #666;
+            line-height: 1.6;
         }
         
         @media (max-width: 768px) {
@@ -234,7 +239,7 @@
             }
             
             .impact-stats {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             }
         }
     </style>

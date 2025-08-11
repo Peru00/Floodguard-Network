@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Match dashboard styling */
         .donor-container {
             max-width: 1200px;
             margin: 20px auto;
@@ -14,20 +15,36 @@
         }
         
         .page-header {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 25px;
+            margin-top: 100px;
             text-align: center;
         }
         
+        .page-header h1 {
+            font-size: 28px;
+            margin: 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .page-header p {
+            color: #666;
+            margin: 12px 0 0 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
         .donations-table {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            border-radius: 15px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
             overflow: hidden;
         }
         
@@ -35,8 +52,11 @@
             background: var(--secondary-color);
             color: white;
             padding: 20px;
-            font-size: 1.2rem;
+            font-size: 18px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .table {
@@ -48,40 +68,42 @@
         .table td {
             padding: 15px;
             text-align: left;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
         }
         
         .table th {
-            background: rgba(0, 123, 255, 0.1);
+            background: #eef2f3;
             font-weight: 600;
-            color: var(--primary-color);
+            color: #222;
         }
         
         .table tbody tr:hover {
-            background: rgba(0, 123, 255, 0.05);
+            background: #f9fafb;
         }
         
         .status-badge {
-            padding: 4px 12px;
+            padding: 4px 8px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 600;
+            letter-spacing: .5px;
             text-transform: uppercase;
         }
         
         .status-pending {
-            background: #fff3cd;
-            color: #856404;
+            background: #fef3c7;
+            color: #92400e;
         }
         
         .status-approved {
-            background: #d4edda;
-            color: #155724;
+            background: #d1fae5;
+            color: #065f46;
         }
         
         .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
+            background: #fee2e2;
+            color: #991b1b;
         }
         
         .btn-view {
@@ -102,13 +124,24 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: var(--text-secondary);
+            color: #666;
         }
         
         .empty-state i {
             font-size: 4rem;
             color: var(--secondary-color);
             margin-bottom: 20px;
+        }
+        
+        .empty-state h3 {
+            color: #222;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .empty-state p {
+            color: #666;
+            line-height: 1.6;
         }
         
         .navbar {
@@ -162,14 +195,33 @@
             color: white;
         }
         
+        .alert {
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        
+        .alert-danger {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+        
         @media (max-width: 768px) {
             .table {
-                font-size: 14px;
+                font-size: 12px;
             }
             
             .table th,
             .table td {
-                padding: 10px;
+                padding: 8px;
             }
         }
     </style>
@@ -236,17 +288,17 @@
                                     <strong>{{ $donation->donation_id }}</strong>
                                 </td>
                                 <td>
-                                    <i class="fas fa-{{ $donation->donation_type === 'monetary' ? 'coins' : ($donation->donation_type === 'goods' ? 'box' : 'hand-helping') }}"></i>
+                                    <i class="fas fa-{{ $donation->donation_type === 'money' ? 'coins' : ($donation->donation_type === 'food' ? 'utensils' : ($donation->donation_type === 'clothing' ? 'tshirt' : ($donation->donation_type === 'medicine' ? 'pills' : 'hand-helping'))) }}"></i>
                                     {{ ucfirst($donation->donation_type) }}
                                 </td>
                                 <td>
-                                    @if($donation->donation_type === 'monetary')
-                                        <strong>৳{{ number_format($donation->amount, 2) }}</strong>
+                                    @if($donation->donation_type === 'money')
+                                        <strong>${{ number_format($donation->amount, 2) }}</strong>
                                         @if($donation->payment_method)
                                             <br><small>via {{ ucfirst($donation->payment_method) }}</small>
                                         @endif
                                     @else
-                                        {{ $donation->items }}
+                                        {{ $donation->items ?? $donation->description }}
                                         @if($donation->quantity)
                                             <br><small>Qty: {{ $donation->quantity }}</small>
                                         @endif
