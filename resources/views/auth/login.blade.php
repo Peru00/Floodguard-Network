@@ -130,9 +130,9 @@
             <ul class="nav-links">
                 <li><a href="{{ route('home') }}">Home</a></li>
                 <li><a href="{{ route('login') }}" class="active">Login/Signup</a></li>
-                <li><a href="#">Admin Dashboard</a></li>
+                <li><a href="{{ route('admin.dashboard') }}">Admin Dashboard</a></li>
                 <li><a href="#">Volunteer Dashboard</a></li>
-                <li><a href="#">Donor Dashboard</a></li>
+                <li><a href="{{ route('donor.dashboard') }}">Donor Dashboard</a></li>
                 <li><a href="{{ route('home') }}#emergency-contact">Emergency Contact</a></li>
             </ul>
         </nav>

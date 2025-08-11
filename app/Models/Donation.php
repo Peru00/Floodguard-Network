@@ -17,27 +17,32 @@ class Donation extends Model
         'donation_id',
         'donor_id',
         'donation_type',
-        'description',
         'amount',
         'items',
         'quantity',
-        'condition_item',
         'payment_method',
         'transaction_id',
         'expiry_date',
         'donation_date',
         'status',
-        'notes'
+        'approved_by',
+        'approved_at'
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'donation_date' => 'datetime',
+        'approved_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
     public function donor()
+    {
+        return $this->belongsTo(User::class, 'donor_id', 'user_id');
+    }
+
+    public function user()
     {
         return $this->belongsTo(User::class, 'donor_id', 'user_id');
     }

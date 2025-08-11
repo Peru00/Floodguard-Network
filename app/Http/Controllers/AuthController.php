@@ -121,7 +121,7 @@ class AuthController extends Controller
             case 'volunteer':
                 return redirect()->route('dashboard')->with('message', 'Volunteer dashboard coming soon!');
             case 'admin':
-                return redirect()->route('dashboard')->with('message', 'Admin dashboard coming soon!');
+                return redirect()->route('admin.dashboard');
             default:
                 return redirect()->route('dashboard');
         }

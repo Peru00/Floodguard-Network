@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DonorController;
+use App\Http\Controllers\AdminController;
 
 // Home routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -18,6 +19,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Protected routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
+    
+    // Admin routes
+    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::post('/donation/update-status', [AdminController::class, 'updateDonationStatus'])->name('donation.update-status');
+    });
     
     // Donor routes
     Route::prefix('donor')->name('donor.')->group(function () {
