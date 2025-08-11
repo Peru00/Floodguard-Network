@@ -7,458 +7,261 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        .donor-container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-        
-        .donor-header {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .donor-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .stat-card i {
-            font-size: 2.5rem;
-            color: var(--secondary-color);
-            margin-bottom: 10px;
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .stat-label {
-            color: var(--text-secondary);
-            margin-top: 5px;
-        }
-        
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        
-        .dashboard-section {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            border-radius: 15px;
-            padding: 25px;
-        }
-        
-        .section-title {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            font-size: 1.5rem;
-        }
-        
-        .section-title i {
-            margin-right: 10px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.8);
-            font-size: 14px;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-        }
-        
-        .btn-submit {
-            background: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-        
-        .btn-submit:hover {
-            background: var(--accent-color);
-            transform: translateY(-2px);
-        }
-        
-        .recent-donations {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .donation-item {
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid;
-        }
-        
-        .donation-item.pending {
-            border-left-color: #ffa502;
-        }
-        
-        .donation-item.approved {
-            border-left-color: #2ed573;
-        }
-        
-        .donation-item.rejected {
-            border-left-color: #ff4757;
-        }
-        
-        .donation-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .donation-id {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-        
-        .donation-status {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .status-pending {
-            background: #ffa502;
-            color: white;
-        }
-        
-        .status-approved {
-            background: #2ed573;
-            color: white;
-        }
-        
-        .status-rejected {
-            background: #ff4757;
-            color: white;
-        }
-        
-        .donation-details {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .monetary-fields {
-            display: none;
-        }
-        
-        .goods-fields {
-            display: none;
-        }
-        
-        .navbar {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            padding: 1rem 0;
-            margin-bottom: 2rem;
-        }
-        
-        .navbar .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .navbar .logo {
-            display: flex;
-            align-items: center;
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        
-        .navbar .logo i {
-            margin-right: 10px;
-        }
-        
-        .navbar .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 20px;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .navbar .nav-links a {
-            color: var(--primary-color);
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .navbar .nav-links a:hover,
-        .navbar .nav-links a.active {
-            background: var(--secondary-color);
-            color: white;
-        }
-        
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .donor-stats {
-                grid-template-columns: 1fr;
-            }
+        /* Dashboard specific additions aligned to provided static HTML & screenshot */
+        .profile-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;}
+        .profile-header h2 {font-weight:600;margin:0;}
+        .volunteer-id {font-size:12px;color:#666;margin-top:4px;}
+        .profile-stats {display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+        .profile-stats .stat-item {background:#eef2f3;border:1px solid #e5e7eb;border-radius:6px;padding:14px;display:flex;align-items:center;gap:12px;}
+        .profile-stats .stat-item i {font-size:18px;color:var(--secondary-color);}
+        .profile-stats .stat-item span {display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:4px;}
+        .profile-stats .stat-item strong {font-size:13px;font-weight:600;color:#222;}
+        /* Form */
+        .form-header {display:flex;align-items:center;gap:8px;margin-bottom:18px;}
+        .form-header h2 {font-size:18px;margin:0;font-weight:600;display:flex;align-items:center;gap:8px;}
+        .donation-type-row {display:flex;flex-wrap:wrap;align-items:center;gap:38px;padding:10px 5px 5px 5px;}
+        .donation-type-row .option {display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;}
+        .donation-type-row input {width:16px;height:16px;}
+        .conditional-block {display:none;margin-top:18px;}
+        .conditional-block.active {display:block;}
+        .inline-fields {display:flex;flex-wrap:wrap;gap:20px;margin-bottom:14px;}
+        .inline-fields .form-group {flex:1 min-width:200px;}
+        .form-actions {display:flex;justify-content:flex-end;gap:10px;margin-top:10px;}
+        .alert {font-size:14px;}
+        /* Notifications */
+        .notification-container {margin-top:30px;}
+        .notification-item {background:#fff;border-radius:6px;padding:18px 20px;margin-bottom:14px;border:1px solid #eee;position:relative;border-left:4px solid #ddd;}
+        .notification-item.approved{border-left-color:#2ed573;}
+        .notification-item.rejected{border-left-color:#ff4757;}
+        .notification-item.pending{border-left-color:#ffa502;}
+        .notification-title {display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+        .notification-title h3 {margin:0;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
+        .status-badge {font-size:10px;padding:4px 8px;border-radius:20px;font-weight:600;letter-spacing:.5px;}
+        .status-approved{background:#d1fae5;color:#065f46;}
+        .status-rejected{background:#fee2e2;color:#991b1b;}
+        .status-pending{background:#fef3c7;color:#92400e;}
+        .notification-time {font-size:11px;color:#6b7280;}
+        .notification-message {font-size:13px;color:#222;margin-bottom:4px;}
+        .view-link {font-size:12px;color:#2563eb;font-weight:500;text-decoration:none;}
+        .view-link:hover{text-decoration:underline;}
+        @media (max-width: 768px){
+            .donation-type-row {gap:16px;}
+            .profile-stats {grid-template-columns:repeat(auto-fit,minmax(140px,1fr));}
         }
     </style>
 </head>
-<body>
-    <!-- Navigation -->
+<body class="admin-container">
     <nav class="navbar">
-        <div class="container">
-            <div class="logo">
-                <i class="fas fa-hands-helping"></i>
-                <span>Floodguard Network</span>
+        <div class="logo">
+            <i class="fas fa-hands-helping"></i>
+            <h1>HelpHub</h1>
+        </div>
+        <div class="nav-links">
+            <a href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Home</span></a>
+            <a href="{{ route('donor.dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
+            <a href="{{ route('donor.distribution') }}"><i class="fas fa-archive"></i> <span>Distribution Repo</span></a>
+            <div class="admin-profile" style="cursor: pointer;" onclick="window.location.href='{{ route('donor.edit-profile') }}'">
+                <img src="{{ Auth::user()->profile_picture ? asset(Auth::user()->profile_picture) : 'https://randomuser.me/api/portraits/men/32.jpg' }}" alt="Donor">
+                <div>
+                    <p>{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</p>
+                    <small>Donor</small>
+                </div>
             </div>
-            <ul class="nav-links">
-                <li><a href="{{ route('donor.dashboard') }}" class="active">Dashboard</a></li>
-                <li><a href="{{ route('donor.donations') }}">My Donations</a></li>
-                <li><a href="{{ route('donor.distribution-repository') }}">Distribution</a></li>
-                <li><a href="{{ route('logout') }}">Logout</a></li>
-            </ul>
+            <a href="#" class="logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fas fa-sign-out-alt"></i></a>
         </div>
     </nav>
 
-    <div class="donor-container">
-        <!-- Welcome Header -->
-        <div class="donor-header">
-            <h1>Welcome, {{ $donorInfo->first_name ?? 'Donor' }} {{ $donorInfo->last_name ?? '' }}</h1>
-            <p>Thank you for your generous support in helping flood victims. Your contributions make a real difference.</p>
-        </div>
-
-        <!-- Success/Error Messages -->
-        @if(session('success'))
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
-            </div>
-        @endif
-
-        <!-- Statistics Cards -->
-        <div class="donor-stats">
-            <div class="stat-card">
-                <i class="fas fa-hand-holding-heart"></i>
-                <div class="stat-value">{{ $donorInfo->total_donations ?? 0 }}</div>
-                <div class="stat-label">Total Donations</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-coins"></i>
-                <div class="stat-value">৳{{ number_format($donorInfo->total_amount ?? 0, 2) }}</div>
-                <div class="stat-label">Total Amount</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-calendar-alt"></i>
-                <div class="stat-value">{{ $donorInfo->last_donation_date ? \Carbon\Carbon::parse($donorInfo->last_donation_date)->format('M d') : 'N/A' }}</div>
-                <div class="stat-label">Last Donation</div>
-            </div>
-        </div>
-
-        <!-- Dashboard Grid -->
-        <div class="dashboard-grid">
-            <!-- Make New Donation -->
-            <div class="dashboard-section">
-                <h2 class="section-title">
-                    <i class="fas fa-plus-circle"></i>
-                    Make a New Donation
-                </h2>
-                
-                <form action="{{ route('donor.submit-donation') }}" method="POST">
-                    @csrf
-                    
-                    <div class="form-group">
-                        <label for="donation_type">Donation Type</label>
-                        <select id="donation_type" name="donation_type" required onchange="toggleDonationFields()">
-                            <option value="">Select Donation Type</option>
-                            <option value="monetary">Monetary Donation</option>
-                            <option value="goods">Goods/Items</option>
-                            <option value="services">Services</option>
-                        </select>
+    <main class="main-content">
+        <!-- Profile & Stats -->
+        <section class="volunteer-hero" style="margin-bottom:25px;">
+            <div class="volunteer-profile" style="background:#fff;border-radius:8px;padding:24px;border:1px solid #e5e7eb;">
+                <div class="profile-header">
+                    <div>
+                        <h2>{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</h2>
+                        <p class="volunteer-id">Donor ID: {{ Auth::user()->user_id ?? 'USER-'.time() }}</p>
                     </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <span>Phone No</span>
+                            <strong>{{ Auth::user()->phone ?? 'N/A' }}</strong>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <span>Email</span>
+                            <strong>{{ Auth::user()->email }}</strong>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <div>
+                            <span>Total Donations</span>
+                            <strong>{{ $totalDonations ?? 0 }} Contributions</strong>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <div>
+                            <span>Total Amount</span>
+                            <strong>${{ number_format($totalAmount ?? 0, 2) }}</strong>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-calendar-check"></i>
+                        <div>
+                            <span>Last Donation</span>
+                            <strong>
+                                @if(isset($donations) && $donations->count())
+                                    {{ optional($donations->first()->created_at)->format('M d, Y') }}
+                                @else
+                                    ---
+                                @endif
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-                    <div id="monetary-fields" class="monetary-fields">
+        <!-- Add Donation -->
+        <section class="table-container" style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:24px;margin-bottom:28px;">
+            <div class="form-header">
+                <h2><i class="fas fa-plus-circle"></i> Add New Donation</h2>
+            </div>
+
+            @if(session('success'))
+                <div class="alert alert-success" style="background:#d1fae5;border:1px solid #10b981;color:#065f46;padding:10px 14px;border-radius:6px;margin-bottom:16px;">{{ session('success') }}</div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger" style="background:#fee2e2;border:1px solid #ef4444;color:#991b1b;padding:10px 14px;border-radius:6px;margin-bottom:16px;">{{ session('error') }}</div>
+            @endif
+
+            <form id="donationForm" class="report-form compact" method="POST" action="{{ route('donor.submit-donation') }}">
+                @csrf
+                <div class="donation-type-row">
+                    <label class="option"><input type="radio" name="donation_type" value="money" required> Money</label>
+                    <label class="option"><input type="radio" name="donation_type" value="food"> Food</label>
+                    <label class="option"><input type="radio" name="donation_type" value="clothing"> Clothing</label>
+                    <label class="option"><input type="radio" name="donation_type" value="medicine"> Medicine</label>
+                    <label class="option"><input type="radio" name="donation_type" value="other"> Other</label>
+                </div>
+
+                <div id="moneyFields" class="conditional-block">
+                    <div class="inline-fields">
                         <div class="form-group">
-                            <label for="amount">Amount (৳)</label>
-                            <input type="number" id="amount" name="amount" min="0" step="0.01" placeholder="Enter amount">
+                            <label>Amount (USD) *</label>
+                            <input type="number" step="0.01" name="amount_quantity" placeholder="e.g. 150" />
                         </div>
                         <div class="form-group">
-                            <label for="payment_method">Payment Method</label>
-                            <select id="payment_method" name="payment_method">
-                                <option value="">Select Payment Method</option>
-                                <option value="bkash">bKash</option>
-                                <option value="nogad">Nagad</option>
-                                <option value="rocket">Rocket</option>
-                                <option value="bank_transfer">Bank Transfer</option>
+                            <label>Payment Method *</label>
+                            <select name="payment_method">
+                                <option value="">Select method</option>
+                                <option value="bank">Bank Transfer</option>
+                                <option value="mobile">Mobile Payment</option>
+                                <option value="credit">Credit Card</option>
                                 <option value="cash">Cash</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="transaction_id">Transaction ID</label>
-                            <input type="text" id="transaction_id" name="transaction_id" placeholder="Enter transaction ID">
+                            <label>Transaction ID *</label>
+                            <input type="text" name="transaction_id" placeholder="Enter transaction reference" />
                         </div>
                     </div>
-
-                    <div id="goods-fields" class="goods-fields">
-                        <div class="form-group">
-                            <label for="items">Items Description</label>
-                            <textarea id="items" name="items" rows="3" placeholder="Describe the items you're donating"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="quantity">Quantity/Units</label>
-                            <input type="number" id="quantity" name="quantity" min="1" placeholder="Enter quantity">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-heart"></i> Submit Donation
-                    </button>
-                </form>
-            </div>
-
-            <!-- Recent Donations -->
-            <div class="dashboard-section">
-                <h2 class="section-title">
-                    <i class="fas fa-history"></i>
-                    Recent Donations
-                </h2>
-                
-                <div class="recent-donations">
-                    @forelse($recentDonations as $donation)
-                        <div class="donation-item {{ $donation->status }}">
-                            <div class="donation-header">
-                                <span class="donation-id">{{ $donation->donation_id }}</span>
-                                <span class="donation-status status-{{ $donation->status }}">{{ ucfirst($donation->status) }}</span>
-                            </div>
-                            <div class="donation-details">
-                                <div>Type: {{ ucfirst($donation->donation_type) }}</div>
-                                @if($donation->amount)
-                                    <div>Amount: ৳{{ number_format($donation->amount, 2) }}</div>
-                                @endif
-                                @if($donation->items)
-                                    <div>Items: {{ $donation->items }}</div>
-                                @endif
-                                <div>Date: {{ \Carbon\Carbon::parse($donation->donation_date)->format('M d, Y H:i') }}</div>
-                            </div>
-                        </div>
-                    @empty
-                        <p style="text-align: center; color: var(--text-secondary); padding: 40px 20px;">
-                            <i class="fas fa-heart" style="font-size: 3rem; margin-bottom: 15px; color: var(--secondary-color);"></i><br>
-                            No donations yet. Start making a difference today!
-                        </p>
-                    @endforelse
                 </div>
-                
-                @if(count($recentDonations) > 0)
-                    <div style="text-align: center; margin-top: 20px;">
-                        <a href="{{ route('donor.donations') }}" class="btn-submit" style="display: inline-block; width: auto; padding: 8px 20px;">
-                            View All Donations
-                        </a>
+
+                <div id="itemFields" class="conditional-block">
+                    <div class="inline-fields">
+                        <div class="form-group">
+                            <label>Quantity *</label>
+                            <input type="text" name="amount_quantity" placeholder="e.g. 25 boxes" />
+                        </div>
+                        <div class="form-group">
+                            <label>Expiry Date <small>(Food/Medicine)</small></label>
+                            <input type="date" name="expiry_date" />
+                        </div>
                     </div>
-                @endif
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label>Description *</label>
+                        <textarea name="description" rows="3" placeholder="Describe the items you wish to donate"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="reset" class="btn btn-secondary" id="resetBtn">Clear Form</button>
+                    <button type="submit" class="btn btn-primary">Submit Donation</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Notifications -->
+        <section class="table-container notification-container" style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:24px;">
+            <div class="notification-header" style="margin-bottom:14px;">
+                <h2 style="font-size:18px;margin:0;display:flex;align-items:center;gap:8px;"><i class="fas fa-bell"></i> Notifications</h2>
             </div>
-        </div>
-    </div>
+            @php $recent = isset($donations)? $donations->take(5) : collect(); @endphp
+            @if($recent->isEmpty())
+                <div class="notification-item pending">
+                    <div class="notification-title">
+                        <h3>No Notifications</h3>
+                        <span class="notification-time">—</span>
+                    </div>
+                    <div class="notification-message">You don't have any donation updates yet.</div>
+                </div>
+            @else
+                @foreach($recent as $donation)
+                    <div class="notification-item {{ strtolower($donation->status) }}">
+                        <div class="notification-title">
+                            <h3>
+                                Donation {{ ucfirst($donation->status) }}
+                                <span class="status-badge status-{{ strtolower($donation->status) }}">{{ strtoupper($donation->status) }}</span>
+                            </h3>
+                            <span class="notification-time">{{ optional($donation->created_at)->diffForHumans() }}</span>
+                        </div>
+                        <div class="notification-message">
+                            @if($donation->donation_type === 'money')
+                                Monetary donation of ${{ number_format($donation->amount,2) }}.
+                            @else
+                                {{ ucfirst($donation->donation_type) }} donation ({{ $donation->quantity ?? 'n/a' }}).
+                            @endif
+                        </div>
+                        <a class="view-link" href="{{ route('donor.view-donation', $donation->donation_id) }}">View Details</a>
+                    </div>
+                @endforeach
+            @endif
+        </section>
+    </main>
+
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
 
     <script>
-        function toggleDonationFields() {
-            const donationType = document.getElementById('donation_type').value;
-            const monetaryFields = document.getElementById('monetary-fields');
-            const goodsFields = document.getElementById('goods-fields');
-            
-            // Hide all fields first
-            monetaryFields.style.display = 'none';
-            goodsFields.style.display = 'none';
-            
-            // Show relevant fields
-            if (donationType === 'monetary') {
-                monetaryFields.style.display = 'block';
-            } else if (donationType === 'goods' || donationType === 'services') {
-                goodsFields.style.display = 'block';
+        (function(){
+            const moneyFields = document.getElementById('moneyFields');
+            const itemFields = document.getElementById('itemFields');
+            const radios = document.querySelectorAll('input[name="donation_type"]');
+            const resetBtn = document.getElementById('resetBtn');
+            function updateBlocks(){
+                let val = document.querySelector('input[name="donation_type"]:checked')?.value;
+                moneyFields.classList.remove('active');
+                itemFields.classList.remove('active');
+                // clear validation requirements
+                moneyFields.querySelectorAll('input,select,textarea').forEach(el=>el.required=false);
+                itemFields.querySelectorAll('input,select,textarea').forEach(el=>el.required=false);
+                if(val==='money'){
+                    moneyFields.classList.add('active');
+                    moneyFields.querySelectorAll('input,select,textarea').forEach(el=>{ if(['amount_quantity','payment_method','transaction_id'].includes(el.name)) el.required=true; });
+                } else if(val){
+                    itemFields.classList.add('active');
+                    itemFields.querySelector('input[name="amount_quantity"]').required=true;
+                    itemFields.querySelector('textarea[name="description"]').required=true;
+                }
             }
-        }
+            radios.forEach(r=>r.addEventListener('change',updateBlocks));
+            resetBtn.addEventListener('click',()=>{moneyFields.classList.remove('active');itemFields.classList.remove('active');});
+        })();
     </script>
 </body>
 </html>

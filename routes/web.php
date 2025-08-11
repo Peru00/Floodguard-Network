@@ -13,7 +13,7 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::get('/signup', [AuthController::class, 'showSignup'])->name('signup');
 Route::post('/signup', [AuthController::class, 'signup'])->name('signup.submit');
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Protected routes
 Route::middleware('auth')->group(function () {
@@ -25,6 +25,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/submit-donation', [DonorController::class, 'submitDonation'])->name('submit-donation');
         Route::get('/donations', [DonorController::class, 'donations'])->name('donations');
         Route::get('/donation/{id}', [DonorController::class, 'viewDonation'])->name('view-donation');
-        Route::get('/distribution-repository', [DonorController::class, 'distributionRepository'])->name('distribution-repository');
+        Route::get('/distribution-repository', [DonorController::class, 'distributionRepository'])->name('distribution');
+        Route::get('/profile/edit', [DonorController::class, 'editProfile'])->name('edit-profile');
+        Route::post('/profile/update', [DonorController::class, 'updateProfile'])->name('update-profile');
     });
 });

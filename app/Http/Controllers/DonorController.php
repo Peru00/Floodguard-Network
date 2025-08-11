@@ -20,26 +20,65 @@ class DonorController extends Controller
         }
         
         try {
-            // Get donor profile data
-            $donorInfo = (object)[
-                'user_id' => $user->user_id,
-                'first_name' => $user->first_name,
-                'last_name' => $user->last_name,
-                'email' => $user->email,
-                'total_donations' => 0,
-                'total_amount' => 0,
-                'last_donation_date' => null
-            ];
+            // Get all donations for this user
+            $donations = Donation::where('donor_id', $user->user_id)->get();
             
-            // Get recent donations (simplified for now)
-            $recentDonations = collect([]);
+            // Calculate statistics
+            $totalDonations = $donations->count();
+            $totalAmount = $donations->where('donation_type', 'money')->sum('amount');
+            $approvedDonations = $donations->where('status', 'approved')->count();
+            $pendingDonations = $donations->where('status', 'pending')->count();
+            $rejectedDonations = $donations->where('status', 'rejected')->count();
             
-            return view('donor.dashboard', compact('donorInfo', 'recentDonations'));
+            // Get recent donations ordered by creation date
+            $donations = $donations->sortByDesc('created_at');
+            
+            return view('donor.dashboard', compact(
+                'donations', 
+                'totalDonations', 
+                'totalAmount', 
+                'approvedDonations', 
+                'pendingDonations', 
+                'rejectedDonations'
+            ));
             
         } catch (\Exception $e) {
             \Log::error('Error in donor dashboard', ['error' => $e->getMessage()]);
             return redirect()->route('login')->with('error', 'Error loading dashboard');
         }
+    }
+
+    /**
+     * Helper function to display time elapsed (matching PHP version)
+     */
+    private function timeElapsedString($datetime, $full = false) {
+        $now = new \DateTime();
+        $ago = new \DateTime($datetime);
+        $diff = $now->diff($ago);
+
+        $diff->w = floor($diff->d / 7);
+        $diff->d -= $diff->w * 7;
+
+        $string = array(
+            'y' => 'year',
+            'm' => 'month',
+            'w' => 'week',
+            'd' => 'day',
+            'h' => 'hour',
+            'i' => 'minute',
+            's' => 'second',
+        );
+        
+        foreach ($string as $k => &$v) {
+            if ($diff->$k) {
+                $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+            } else {
+                unset($string[$k]);
+            }
+        }
+
+        if (!$full) $string = array_slice($string, 0, 1);
+        return $string ? implode(', ', $string) . ' ago' : 'just now';
     }
     
     public function submitDonation(Request $request)
@@ -47,33 +86,54 @@ class DonorController extends Controller
         $user = Auth::user();
         
         $validatedData = $request->validate([
-            'donation_type' => 'required|in:monetary,goods,services',
-            'amount' => 'nullable|numeric|min:0',
-            'items' => 'nullable|string|max:255',
-            'quantity' => 'nullable|integer|min:1',
-            'payment_method' => 'nullable|string|max:50',
-            'transaction_id' => 'nullable|string|max:100',
+            'donation_type' => 'required|in:money,food,clothing,medicine,other',
+            'amount_quantity' => 'required|string',
+            'description' => 'nullable|string',
+            'payment_method' => 'nullable|in:bank,mobile,credit,cash',
+            'transaction_id' => 'nullable|string',
+            'expiry_date' => 'nullable|date',
         ]);
+
+        // Additional validation based on donation type
+        if ($validatedData['donation_type'] === 'money') {
+            $request->validate([
+                'payment_method' => 'required|in:bank,mobile,credit,cash',
+                'transaction_id' => 'required|string',
+            ]);
+        } else {
+            // For non-money donations, description is required
+            if (empty($validatedData['description'])) {
+                return redirect()->route('donor.dashboard')
+                               ->with('error', 'Description is required for non-monetary donations.');
+            }
+        }
         
         try {
             $donationData = [
                 'donation_id' => 'DON-' . time() . rand(100, 999),
                 'donor_id' => $user->user_id,
-                'donation_type' => $validatedData['donation_type'],
+                'donation_type' => $validatedData['donation_type'] === 'money' ? 'monetary' : $validatedData['donation_type'],
                 'donation_date' => now(),
-                'status' => 'pending'
+                'status' => 'pending',
+                'created_at' => now(),
+                'updated_at' => now()
             ];
             
-            if ($validatedData['donation_type'] === 'monetary') {
-                $donationData['amount'] = $validatedData['amount'];
+            if ($validatedData['donation_type'] === 'money') {
+                $donationData['amount'] = (float) $validatedData['amount_quantity'];
                 $donationData['payment_method'] = $validatedData['payment_method'];
                 $donationData['transaction_id'] = $validatedData['transaction_id'];
             } else {
-                $donationData['items'] = $validatedData['items'];
-                $donationData['quantity'] = $validatedData['quantity'];
+                $donationData['items'] = $validatedData['description']; // Store description as items
+                $donationData['quantity'] = $validatedData['amount_quantity'];
+                $donationData['description'] = $validatedData['description'];
+                if (isset($validatedData['expiry_date'])) {
+                    $donationData['expiry_date'] = $validatedData['expiry_date'];
+                }
             }
             
-            DB::table('donations')->insert($donationData);
+            // Use Donation model to create
+            Donation::create($donationData);
             
             return redirect()->route('donor.dashboard')
                            ->with('success', 'Donation submitted successfully! It will be reviewed by our team.');
@@ -135,5 +195,59 @@ class DonorController extends Controller
         ");
         
         return view('donor.distribution-repository', compact('distributions'));
+    }
+
+    public function editProfile()
+    {
+        $user = Auth::user();
+        
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Please log in first');
+        }
+        
+        return view('donor.edit-profile', compact('user'));
+    }
+    
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Please log in first');
+        }
+        
+        $validatedData = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->user_id . ',user_id',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+        
+        try {
+            // Handle profile picture upload
+            if ($request->hasFile('profile_picture')) {
+                $image = $request->file('profile_picture');
+                $imageName = time() . '_' . $user->id . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('uploads/profiles'), $imageName);
+                $validatedData['profile_picture'] = 'uploads/profiles/' . $imageName;
+                
+                // Delete old profile picture if exists
+                if ($user->profile_picture && file_exists(public_path($user->profile_picture))) {
+                    unlink(public_path($user->profile_picture));
+                }
+            }
+            
+            // Update user data
+            $user->update($validatedData);
+            
+            return redirect()->route('donor.edit-profile')
+                           ->with('success', 'Profile updated successfully!');
+                           
+        } catch (\Exception $e) {
+            return redirect()->route('donor.edit-profile')
+                           ->with('error', 'Error updating profile: ' . $e->getMessage());
+        }
     }
 }
