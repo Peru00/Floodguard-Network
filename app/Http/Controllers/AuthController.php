@@ -119,7 +119,7 @@ class AuthController extends Controller
             case 'donor':
                 return redirect()->route('donor.dashboard');
             case 'volunteer':
-                return redirect()->route('dashboard')->with('message', 'Volunteer dashboard coming soon!');
+                return redirect()->route('volunteer.dashboard');
             case 'admin':
                 return redirect()->route('admin.dashboard');
             default:

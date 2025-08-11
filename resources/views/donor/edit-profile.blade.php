@@ -122,12 +122,12 @@
     <nav class="navbar">
         <div class="logo">
             <i class="fas fa-hands-helping"></i>
-            <h1>HelpHub</h1>
+            <h1>Floodguard Network</h1>
         </div>
         <div class="nav-links">
             <a href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Home</span></a>
             <a href="{{ route('donor.dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
-            <a href="{{ route('donor.distribution') }}"><i class="fas fa-archive"></i> <span>Distribution Repo</span></a>
+            <a href="{{ route('donor.distribution-repository') }}"><i class="fas fa-archive"></i> <span>Distribution Repo</span></a>
             <div class="admin-profile">
                 <img src="{{ $user->profile_picture ? asset($user->profile_picture) : 'https://randomuser.me/api/portraits/men/32.jpg' }}" alt="Donor">
                 <div>

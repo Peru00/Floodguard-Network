@@ -54,7 +54,7 @@
     <nav class="navbar">
         <div class="logo">
             <i class="fas fa-hands-helping"></i>
-            <h1>HelpHub</h1>
+            <h1>Floodguard Network</h1>
         </div>
         <div class="nav-links">
             <a href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Home</span></a>
