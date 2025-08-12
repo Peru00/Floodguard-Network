@@ -386,4 +386,136 @@ class AdminController extends Controller
                 ->with('error', 'Error transferring admin rights: ' . $e->getMessage());
         }
     }
+
+    public function editUser($id)
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
+            return redirect()->route('login')->with('error', 'Admin access required');
+        }
+
+        try {
+            $userToEdit = User::findOrFail($id);
+            
+            // Prevent admin from editing themselves
+            if ($userToEdit->user_id === $user->user_id) {
+                return redirect()->route('admin.user-management')
+                    ->with('error', 'You cannot edit your own account');
+            }
+
+            return view('admin.edit-user', compact('userToEdit'));
+
+        } catch (\Exception $e) {
+            \Log::error('Error loading edit user page', ['error' => $e->getMessage(), 'user_id' => $id]);
+            return redirect()->route('admin.user-management')
+                ->with('error', 'User not found');
+        }
+    }
+
+    public function updateUser(Request $request, $id)
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
+            return redirect()->route('login')->with('error', 'Admin access required');
+        }
+
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id . ',user_id',
+            'phone' => 'nullable|string|max:20',
+            'role' => 'required|in:admin,donor,volunteer,victim',
+            'password' => 'nullable|min:8|confirmed'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $userToUpdate = User::findOrFail($id);
+            
+            // Prevent admin from editing themselves
+            if ($userToUpdate->user_id === $user->user_id) {
+                return redirect()->route('admin.user-management')
+                    ->with('error', 'You cannot edit your own account');
+            }
+
+            // Update user data
+            $userToUpdate->first_name = $request->first_name;
+            $userToUpdate->last_name = $request->last_name;
+            $userToUpdate->email = $request->email;
+            $userToUpdate->phone = $request->phone;
+            $userToUpdate->role = $request->role;
+
+            if ($request->filled('password')) {
+                $userToUpdate->password = Hash::make($request->password);
+            }
+
+            $userToUpdate->save();
+
+            DB::commit();
+
+            return redirect()->route('admin.user-management')
+                ->with('success', 'User updated successfully');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error updating user', ['error' => $e->getMessage(), 'user_id' => $id]);
+            return redirect()->route('admin.user-management')
+                ->with('error', 'Error updating user: ' . $e->getMessage());
+        }
+    }
+
+    public function deleteUser($id)
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
+            return redirect()->route('login')->with('error', 'Admin access required');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $userToDelete = User::findOrFail($id);
+            
+            // Prevent admin from deleting themselves
+            if ($userToDelete->user_id === $user->user_id) {
+                return redirect()->route('admin.user-management')
+                    ->with('error', 'You cannot delete your own account');
+            }
+
+            // Prevent deletion of the last admin
+            if ($userToDelete->role === 'admin') {
+                $adminCount = User::where('role', 'admin')->count();
+                if ($adminCount <= 1) {
+                    return redirect()->route('admin.user-management')
+                        ->with('error', 'Cannot delete the last admin user');
+                }
+            }
+
+            // Delete related profile data first
+            if ($userToDelete->role === 'donor') {
+                DB::table('donor_profiles')->where('donor_id', $userToDelete->user_id)->delete();
+            } elseif ($userToDelete->role === 'volunteer') {
+                DB::table('volunteer_profiles')->where('volunteer_id', $userToDelete->user_id)->delete();
+            }
+
+            // Delete the user
+            $userName = $userToDelete->first_name . ' ' . $userToDelete->last_name;
+            $userToDelete->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.user-management')
+                ->with('success', 'User "' . $userName . '" has been deleted successfully');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error deleting user', ['error' => $e->getMessage(), 'user_id' => $id]);
+            return redirect()->route('admin.user-management')
+                ->with('error', 'Error deleting user: ' . $e->getMessage());
+        }
+    }
 }

@@ -25,6 +25,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/user-management', [AdminController::class, 'userManagement'])->name('user-management');
         Route::post('/create-user', [AdminController::class, 'createUser'])->name('create-user');
+        Route::get('/users/{id}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+        Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
         Route::post('/transfer-admin', [AdminController::class, 'transferAdmin'])->name('transfer-admin');
         Route::post('/donation/update-status', [AdminController::class, 'updateDonationStatus'])->name('donation.update-status');
         Route::post('/add-victim', [AdminController::class, 'addVictim'])->name('add-victim');
