@@ -23,7 +23,12 @@ Route::middleware('auth')->group(function () {
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/user-management', [AdminController::class, 'userManagement'])->name('user-management');
+        Route::post('/create-user', [AdminController::class, 'createUser'])->name('create-user');
+        Route::post('/transfer-admin', [AdminController::class, 'transferAdmin'])->name('transfer-admin');
         Route::post('/donation/update-status', [AdminController::class, 'updateDonationStatus'])->name('donation.update-status');
+        Route::post('/add-victim', [AdminController::class, 'addVictim'])->name('add-victim');
+        Route::post('/add-volunteer', [AdminController::class, 'addVolunteer'])->name('add-volunteer');
     });
     
     // Donor routes

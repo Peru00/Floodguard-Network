@@ -130,6 +130,87 @@
             color: #333;
         }
 
+        /* Form specific styles for modals */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+            border-left: 4px solid #3498db;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
         /* Enhanced badge styles for availability */
         .badge i {
             margin-right: 4px;
@@ -202,7 +283,7 @@
         <ul class="nav-links">
             <li><a href="{{ route('home') }}"><i class="fas fa-home"></i> Home</a></li>
             <li class="active"><a href="{{ route('admin.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-            <li><a href="#"><i class="fas fa-users"></i> Volunteers</a></li>
+            <li><a href="{{ route('admin.user-management') }}"><i class="fas fa-users-cog"></i> User Management</a></li>
             <li><a href="#"><i class="fas fa-campground"></i> Relief Camps</a></li>
             <li><a href="#"><i class="fas fa-box-open"></i> Inventory</a></li>
             <li><a href="#"><i class="fas fa-donate"></i> Donations</a></li>
@@ -241,7 +322,10 @@
                         <div class="stat-info">
                             <h3>Total Volunteers</h3>
                             <p>{{ $stats['volunteers'] }}</p>
-                            <span class="stat-change neutral"><i class="fas fa-users"></i> Active volunteers</span>
+                            <span class="stat-change {{ $stats['volunteers'] > 0 ? 'up' : 'neutral' }}">
+                                <i class="fas fa-hands-helping"></i> 
+                                {{ $volunteers->where('is_available', true)->count() }} Available Now
+                            </span>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -251,7 +335,9 @@
                         <div class="stat-info">
                             <h3>Total Donors</h3>
                             <p>{{ $stats['donors'] }}</p>
-                            <span class="stat-change neutral"><i class="fas fa-heart"></i> Registered donors</span>
+                            <span class="stat-change {{ $stats['pending_donations'] > 0 ? 'up' : 'neutral' }}">
+                                <i class="fas fa-clock"></i> {{ $stats['pending_donations'] }} Pending Requests
+                            </span>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -261,17 +347,19 @@
                         <div class="stat-info">
                             <h3>Total Donations</h3>
                             <p>${{ number_format($stats['total_donations'], 2) }}</p>
-                            <span class="stat-change up"><i class="fas fa-dollar-sign"></i> Approved donations</span>
+                            <span class="stat-change up"><i class="fas fa-check-circle"></i> Approved donations</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-boxes"></i>
+                            <i class="fas fa-user-injured"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>Distributed Items</h3>
-                            <p>{{ $stats['distributions'] }}</p>
-                            <span class="stat-change neutral"><i class="fas fa-truck"></i> Total distributed</span>
+                            <h3>Total Victims</h3>
+                            <p>{{ $stats['victims'] }}</p>
+                            <span class="stat-change {{ $stats['high_priority_victims'] > 0 ? 'down' : 'neutral' }}">
+                                <i class="fas fa-exclamation-triangle"></i> {{ $stats['high_priority_victims'] }} High Priority
+                            </span>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -281,7 +369,21 @@
                         <div class="stat-info">
                             <h3>Affected Locations</h3>
                             <p>{{ $stats['locations'] }}</p>
-                            <span class="stat-change neutral"><i class="fas fa-globe"></i> Relief locations</span>
+                            <span class="stat-change {{ $stats['pending_victims'] > 0 ? 'up' : 'neutral' }}">
+                                <i class="fas fa-users"></i> {{ $stats['pending_victims'] }} Need Help
+                            </span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Relief Items</h3>
+                            <p>{{ number_format($stats['distributions']) }}</p>
+                            <span class="stat-change {{ $stats['assisted_victims'] > 0 ? 'up' : 'neutral' }}">
+                                <i class="fas fa-heart"></i> {{ $stats['assisted_victims'] }} Assisted
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -386,7 +488,13 @@
                     <div class="section-header">
                         <h2>Registered Victims</h2>
                         <div class="section-actions">
-                            <button class="btn btn-secondary"><i class="fas fa-plus"></i> Add Victim</button>
+                            <span style="margin-right: 15px; color: #666; font-size: 0.9rem;">
+                                {{ $victims->where('status', 'pending')->count() }} Pending
+                            </span>
+                            <span style="margin-right: 15px; color: #666; font-size: 0.9rem;">
+                                {{ $victims->where('status', 'assisted')->count() }} Assisted
+                            </span>
+                            <a href="{{ route('admin.user-management') }}" class="btn btn-secondary"><i class="fas fa-plus"></i> Add Victim</a>
                         </div>
                     </div>
                     <div class="table-container">
@@ -396,15 +504,22 @@
                                     <th>Victim ID</th>
                                     <th>Name</th>
                                     <th>Location</th>
+                                    <th>Family Size</th>
+                                    <th>Priority</th>
                                     <th>Status</th>
-                                    <th>Relief Needed</th>
+                                    <th>Needs</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($victims as $victim)
                                     <tr>
                                         <td>{{ $victim->victim_id }}</td>
-                                        <td>{{ $victim->name }}</td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="fas fa-user-injured" style="color: #e74c3c;"></i>
+                                                {{ $victim->name }}
+                                            </div>
+                                        </td>
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 8px;">
                                                 <i class="fas fa-map-marker-alt" style="color: #e74c3c;"></i>
@@ -412,15 +527,23 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="badge {{ ($victim->status ?? 'active') === 'active' ? 'approved' : 'pending' }}">
-                                                {{ ucfirst($victim->status ?? 'Active') }}
+                                            <span class="badge info">{{ $victim->family_size }} people</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {{ $victim->priority === 'high' ? 'rejected' : ($victim->priority === 'medium' ? 'warning' : 'approved') }}">
+                                                {{ ucfirst($victim->priority) }}
                                             </span>
                                         </td>
-                                        <td>{{ $victim->relief_needed ?? 'Food, Water' }}</td>
+                                        <td>
+                                            <span class="badge {{ $victim->status === 'assisted' ? 'approved' : ($victim->status === 'relocated' ? 'info' : 'pending') }}">
+                                                {{ ucfirst($victim->status) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $victim->needs }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
+                                        <td colspan="7" style="text-align: center; padding: 2rem; color: #666;">
                                             <i class="fas fa-users"></i><br>
                                             No victims registered yet
                                         </td>
@@ -442,7 +565,7 @@
                             <button id="unavailableBtn" class="btn btn-secondary" onclick="showUnavailable()">
                                 {{ $volunteers->where('is_available', false)->count() }} Unavailable
                             </button>
-                            <button class="btn btn-secondary"><i class="fas fa-user-plus"></i> Add Volunteer</button>
+                            <a href="{{ route('admin.user-management') }}" class="btn btn-secondary"><i class="fas fa-user-plus"></i> Add Volunteer</a>
                         </div>
                     </div>
                     <div class="table-container">
@@ -538,6 +661,122 @@
         </div>
     </div>
 
+    <!-- Add Victim Modal -->
+    <div id="addVictimModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Victim</h3>
+                <span class="close" onclick="closeAddVictimModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ route('admin.add-victim') }}">
+                    @csrf
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" name="name" class="form-input" required placeholder="Enter victim's full name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Family Size *</label>
+                        <input type="number" name="family_size" class="form-input" min="1" required placeholder="Number of family members">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" name="phone" class="form-input" placeholder="Contact phone number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Location *</label>
+                        <input type="text" name="location" class="form-input" required placeholder="Current location or address">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Priority Level *</label>
+                        <select name="priority" class="form-select" required>
+                            <option value="">Select priority level</option>
+                            <option value="high">High Priority</option>
+                            <option value="medium">Medium Priority</option>
+                            <option value="low">Low Priority</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Needs Description *</label>
+                        <textarea name="needs" class="form-textarea" required placeholder="Describe what assistance is needed (food, shelter, medical aid, etc.)"></textarea>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddVictimModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Victim</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Volunteer Modal -->
+    <div id="addVolunteerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Volunteer</h3>
+                <span class="close" onclick="closeAddVolunteerModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ route('admin.add-volunteer') }}">
+                    @csrf
+                    <div class="form-group">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" name="first_name" class="form-input" required placeholder="Enter first name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" name="last_name" class="form-input" required placeholder="Enter last name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" name="email" class="form-input" required placeholder="volunteer@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="text" name="phone" class="form-input" required placeholder="Contact phone number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Location *</label>
+                        <input type="text" name="location" class="form-input" required placeholder="City or area of operation">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Skill Type *</label>
+                        <select name="skill_type" class="form-select" required>
+                            <option value="">Select skill type</option>
+                            <option value="Medical Aid">Medical Aid</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Food Distribution">Food Distribution</option>
+                            <option value="Rescue Operations">Rescue Operations</option>
+                            <option value="Communication">Communication</option>
+                            <option value="General Support">General Support</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Login Details:</strong> The volunteer will receive an account with their email as username and default password <strong>"volunteer123"</strong>. They can change this password after first login.
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddVolunteerModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Volunteer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Store donation data for modal display
         const donationData = {
@@ -592,11 +831,36 @@
             document.getElementById('donationModal').style.display = 'none';
         }
 
+        // Add Victim Modal functions
+        function openAddVictimModal() {
+            document.getElementById('addVictimModal').style.display = 'block';
+        }
+
+        function closeAddVictimModal() {
+            document.getElementById('addVictimModal').style.display = 'none';
+        }
+
+        // Add Volunteer Modal functions
+        function openAddVolunteerModal() {
+            document.getElementById('addVolunteerModal').style.display = 'block';
+        }
+
+        function closeAddVolunteerModal() {
+            document.getElementById('addVolunteerModal').style.display = 'none';
+        }
+
         // Close modal when clicking outside of it
         window.onclick = function(event) {
-            const modal = document.getElementById('donationModal');
-            if (event.target == modal) {
+            const donationModal = document.getElementById('donationModal');
+            const victimModal = document.getElementById('addVictimModal');
+            const volunteerModal = document.getElementById('addVolunteerModal');
+            
+            if (event.target == donationModal) {
                 closeDonationModal();
+            } else if (event.target == victimModal) {
+                closeAddVictimModal();
+            } else if (event.target == volunteerModal) {
+                closeAddVolunteerModal();
             }
         }
 
