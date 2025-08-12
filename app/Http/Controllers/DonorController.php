@@ -145,7 +145,7 @@ class DonorController extends Controller
 
                 // Set non-money specific fields
                 $donationData['description'] = $validatedData['description'];
-                $donationData['items'] = $validatedData['item_quantity']; // Store quantity text as items
+                $donationData['items'] = $validatedData['description']; // Store description in items field
                 
                 // Extract numeric quantity from text
                 if (preg_match('/(\d+)/', $validatedData['item_quantity'], $matches)) {

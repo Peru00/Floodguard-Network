@@ -52,6 +52,67 @@
             background: var(--secondary-color);
             color: white;
             padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .table-summary {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background: #f8fafc;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge.completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .table-header {
+            background: var(--secondary-color);
+            color: white;
+            padding: 20px;
             font-size: 18px;
             font-weight: 600;
             display: flex;
@@ -289,70 +350,83 @@
 
         <!-- Distributions Container -->
         <div class="distributions-container">
-            <div class="table-header">
-                <i class="fas fa-list"></i>
-                Recent Distribution Activities
-            </div>
-            
-            <div style="padding: 20px;">
-                @if(count($distributions) > 0)
-                    @foreach($distributions as $distribution)
-                        <div class="distribution-item">
-                            <div class="distribution-header">
-                                <div class="distribution-id">
-                                    <i class="fas fa-box"></i> {{ $distribution->distribution_id }}
-                                </div>
-                                <div class="distribution-date">
-                                    {{ \Carbon\Carbon::parse($distribution->distribution_date)->format('M d, Y h:i A') }}
-                                </div>
-                            </div>
-                            
-                            <div class="distribution-details">
-                                <div class="detail-item">
-                                    <i class="fas fa-user-friends detail-icon"></i>
-                                    <span class="detail-label">Volunteer:</span>
-                                    <span class="detail-value">{{ $distribution->volunteer_name }}</span>
-                                </div>
-                                
-                                <div class="detail-item">
-                                    <i class="fas fa-user detail-icon"></i>
-                                    <span class="detail-label">Victim:</span>
-                                    <span class="detail-value">{{ $distribution->victim_name }}</span>
-                                </div>
-                                
-                                <div class="detail-item">
-                                    <i class="fas fa-box-open detail-icon"></i>
-                                    <span class="detail-label">Relief Type:</span>
-                                    <span class="detail-value">{{ $distribution->relief_type }}</span>
-                                </div>
-                                
-                                <div class="detail-item">
-                                    <i class="fas fa-map-marker-alt detail-icon"></i>
-                                    <span class="detail-label">Location:</span>
-                                    <span class="detail-value">{{ $distribution->location }}</span>
-                                </div>
-                                
-                                <div class="detail-item">
-                                    <i class="fas fa-sort-numeric-up detail-icon"></i>
-                                    <span class="detail-label">Quantity:</span>
-                                    <span class="detail-value">{{ $distribution->quantity }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                @else
-                    <div class="empty-state">
-                        <i class="fas fa-truck"></i>
-                        <h3>No distribution records found</h3>
-                        <p>Distribution activities will appear here once relief operations begin.</p>
-                        <p style="margin-top: 20px;">
-                            <a href="{{ route('donor.dashboard') }}" style="color: var(--secondary-color); text-decoration: none;">
-                                <i class="fas fa-heart"></i> Make a donation to support relief efforts
-                            </a>
-                        </p>
+            @if(count($distributions) > 0)
+                <div class="table-header">
+                    <h3>Recent Distribution Activities</h3>
+                    <div class="table-summary">
+                        <strong>Total: {{ count($distributions) }} distributions</strong>
                     </div>
-                @endif
-            </div>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Distribution ID</th>
+                            <th>Date & Time</th>
+                            <th>Volunteer</th>
+                            <th>Victim</th>
+                            <th>Relief Type</th>
+                            <th>Location</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($distributions as $distribution)
+                        <tr>
+                            <td>
+                                <strong>{{ $distribution->distribution_id }}</strong>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ \Carbon\Carbon::parse($distribution->distribution_date)->format('M d, Y') }}</strong><br>
+                                    <small style="color: #666;">{{ \Carbon\Carbon::parse($distribution->distribution_date)->format('h:i A') }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-user-friends" style="color: var(--secondary-color);"></i>
+                                    <strong>{{ $distribution->volunteer_name }}</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-user-injured" style="color: var(--primary-color);"></i>
+                                    <strong>{{ $distribution->victim_name }}</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-box" style="color: var(--secondary-color);"></i>
+                                    {{ $distribution->relief_type }}
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-map-marker-alt" style="color: var(--warning-color);"></i>
+                                    {{ $distribution->location }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge" style="background-color: rgba(76, 175, 80, 0.1); color: var(--success-color);">
+                                    {{ $distribution->quantity }}
+                                </span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <div class="empty-state">
+                    <i class="fas fa-truck"></i>
+                    <h3>No Distribution Activities Yet</h3>
+                    <p>Distribution activities will appear here once your donations are distributed to flood victims.</p>
+                    <p style="margin-top: 20px;">
+                        <a href="{{ route('donor.dashboard') }}" style="color: var(--secondary-color); text-decoration: none;">
+                            <i class="fas fa-heart"></i> Make a donation to support relief efforts
+                        </a>
+                    </p>
+                </div>
+            @endif
         </div>
 
         @if(count($distributions) > 0)

@@ -129,6 +129,67 @@
             flex: 1;
             color: #333;
         }
+
+        /* Enhanced badge styles for availability */
+        .badge i {
+            margin-right: 4px;
+            font-size: 0.8em;
+        }
+
+        .badge.approved {
+            background-color: #e8f5e8;
+            color: #2d5a27;
+            border: 1px solid #c3e6cb;
+        }
+
+        .badge.rejected {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #8b1538;
+        }
+
+        @keyframes pulse-available {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Real-time indicator */
+        .availability-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .availability-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .availability-dot.available {
+            background: #2ed573;
+            animation: blink-green 1.5s infinite;
+        }
+
+        .availability-dot.unavailable {
+            background: #ff4757;
+        }
+
+        @keyframes blink-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Button toggle styles */
+        .btn.active {
+            background-color: #3498db !important;
+            color: white !important;
+        }
+
+        .btn:not(.active) {
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+        }
     </style>
 </head>
 <body>
@@ -319,58 +380,117 @@
             </section>
 
             <!-- Recent Donations Section -->
-            <section class="donations-section">
-                <div class="section-header">
-                    <h2>Recent Donations</h2>
-                </div>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Donation ID</th>
-                                <th>Donor Name</th>
-                                <th>Type</th>
-                                <th>Amount/Items</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recentDonations as $donation)
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                <!-- Victim List Section -->
+                <section class="donations-section">
+                    <div class="section-header">
+                        <h2>Registered Victims</h2>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary"><i class="fas fa-plus"></i> Add Victim</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
                                 <tr>
-                                    <td>{{ $donation->donation_id }}</td>
-                                    <td>{{ $donation->user->first_name }} {{ $donation->user->last_name }}</td>
-                                    <td>
-                                        <span class="badge @if($donation->donation_type === 'monetary') info @else warning @endif">
-                                            {{ ucfirst($donation->donation_type) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @if($donation->donation_type === 'monetary')
-                                            ${{ number_format($donation->amount, 2) }}
-                                        @else
-                                            {{ $donation->quantity }} {{ $donation->items }}
-                                        @endif
-                                    </td>
-                                    <td>{{ \Carbon\Carbon::parse($donation->donation_date)->format('M d, Y') }}</td>
-                                    <td>
-                                        <span class="badge {{ $donation->status === 'approved' ? 'approved' : ($donation->status === 'rejected' ? 'rejected' : 'pending') }}">
-                                            {{ ucfirst($donation->status) }}
-                                        </span>
-                                    </td>
+                                    <th>Victim ID</th>
+                                    <th>Name</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Relief Needed</th>
                                 </tr>
-                            @empty
+                            </thead>
+                            <tbody>
+                                @forelse($victims as $victim)
+                                    <tr>
+                                        <td>{{ $victim->victim_id }}</td>
+                                        <td>{{ $victim->name }}</td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="fas fa-map-marker-alt" style="color: #e74c3c;"></i>
+                                                {{ $victim->location }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge {{ ($victim->status ?? 'active') === 'active' ? 'approved' : 'pending' }}">
+                                                {{ ucfirst($victim->status ?? 'Active') }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $victim->relief_needed ?? 'Food, Water' }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
+                                            <i class="fas fa-users"></i><br>
+                                            No victims registered yet
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Available Volunteers Section -->
+                <section class="donations-section">
+                    <div class="section-header">
+                        <h2>Available Volunteers</h2>
+                        <div class="section-actions">
+                            <button id="availableBtn" class="btn btn-primary active" onclick="showAvailable()">
+                                {{ $volunteers->where('is_available', true)->count() }} Available
+                            </button>
+                            <button id="unavailableBtn" class="btn btn-secondary" onclick="showUnavailable()">
+                                {{ $volunteers->where('is_available', false)->count() }} Unavailable
+                            </button>
+                            <button class="btn btn-secondary"><i class="fas fa-user-plus"></i> Add Volunteer</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
                                 <tr>
-                                    <td colspan="6" style="text-align: center; padding: 2rem; color: #666;">
-                                        <i class="fas fa-inbox"></i><br>
-                                        No donations found
-                                    </td>
+                                    <th>Volunteer ID</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Availability</th>
+                                    <th>Assigned Tasks</th>
                                 </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                            </thead>
+                            <tbody>
+                                @forelse($volunteers as $volunteer)
+                                    <tr class="volunteer-row {{ $volunteer->is_available ? 'available-volunteer' : 'unavailable-volunteer' }}" style="{{ !$volunteer->is_available ? 'display: none;' : '' }}">
+                                        <td>{{ $volunteer->user_id }}</td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="fas fa-user" style="color: #3498db;"></i>
+                                                {{ $volunteer->first_name }} {{ $volunteer->last_name }}
+                                            </div>
+                                        </td>
+                                        <td>{{ $volunteer->phone ?? 'N/A' }}</td>
+                                        <td>
+                                            @if($volunteer->is_available)
+                                                <span class="badge approved">Available</span>
+                                            @else
+                                                <span class="badge rejected">Unavailable</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span style="color: #7f8c8d;">No tasks</span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr id="no-volunteers-message">
+                                        <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
+                                            <i class="fas fa-hands-helping"></i><br>
+                                            <span id="no-volunteers-text">No available volunteers</span>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
         </main>
     </div>
 
@@ -421,17 +541,17 @@
     <script>
         // Store donation data for modal display
         const donationData = {
-            @foreach($pendingDonations->concat($recentDonations) as $donation)
+            @foreach($pendingDonations as $donation)
             '{{ $donation->donation_id }}': {
                 id: '{{ $donation->donation_id }}',
                 donorName: '{{ $donation->user->first_name }} {{ $donation->user->last_name }}',
                 type: '{{ ucfirst($donation->donation_type) }}',
-                amount: @if($donation->donation_type === 'monetary') '{{ "$" . number_format($donation->amount, 2) }}' @else '{{ $donation->quantity }} {{ $donation->items }}' @endif,
+                amount: '@if($donation->donation_type === "monetary")${{ number_format($donation->amount ?? 0, 2) }}@else{{ $donation->quantity ?? 0 }} {{ $donation->items ?? "items" }}@endif',
                 date: '{{ \Carbon\Carbon::parse($donation->donation_date)->format("M d, Y") }}',
                 status: '{{ ucfirst($donation->status) }}',
                 paymentMethod: '{{ $donation->payment_method ?? "N/A" }}',
                 transactionId: '{{ $donation->transaction_id ?? "N/A" }}'
-            },
+            }@if(!$loop->last),@endif
             @endforeach
         };
 
@@ -477,6 +597,55 @@
             const modal = document.getElementById('donationModal');
             if (event.target == modal) {
                 closeDonationModal();
+            }
+        }
+
+        // Volunteer availability toggle functions
+        function showAvailable() {
+            // Hide unavailable volunteers
+            document.querySelectorAll('.unavailable-volunteer').forEach(function(row) {
+                row.style.display = 'none';
+            });
+            
+            // Show available volunteers
+            document.querySelectorAll('.available-volunteer').forEach(function(row) {
+                row.style.display = '';
+            });
+            
+            // Update button states
+            document.getElementById('availableBtn').classList.add('active');
+            document.getElementById('unavailableBtn').classList.remove('active');
+            
+            // Update no volunteers message
+            const availableCount = document.querySelectorAll('.available-volunteer').length;
+            const noVolunteersMessage = document.getElementById('no-volunteers-message');
+            if (noVolunteersMessage) {
+                document.getElementById('no-volunteers-text').textContent = availableCount === 0 ? 'No available volunteers' : '';
+                noVolunteersMessage.style.display = availableCount === 0 ? '' : 'none';
+            }
+        }
+
+        function showUnavailable() {
+            // Hide available volunteers
+            document.querySelectorAll('.available-volunteer').forEach(function(row) {
+                row.style.display = 'none';
+            });
+            
+            // Show unavailable volunteers
+            document.querySelectorAll('.unavailable-volunteer').forEach(function(row) {
+                row.style.display = '';
+            });
+            
+            // Update button states
+            document.getElementById('unavailableBtn').classList.add('active');
+            document.getElementById('availableBtn').classList.remove('active');
+            
+            // Update no volunteers message
+            const unavailableCount = document.querySelectorAll('.unavailable-volunteer').length;
+            const noVolunteersMessage = document.getElementById('no-volunteers-message');
+            if (noVolunteersMessage) {
+                document.getElementById('no-volunteers-text').textContent = unavailableCount === 0 ? 'No unavailable volunteers' : '';
+                noVolunteersMessage.style.display = unavailableCount === 0 ? '' : 'none';
             }
         }
     </script>

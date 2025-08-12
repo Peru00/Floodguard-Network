@@ -7,6 +7,87 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Custom Navbar Styling */
+        .navbar {
+            background: #525470 !important;
+            padding: 0.4rem 2rem !important; /* Made 50% thinner - reduced from 0.6rem to 0.4rem */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .navbar .logo h1 {
+            font-size: 1.8rem !important;
+            font-weight: 600 !important;
+            color: white !important;
+        }
+        
+        .navbar .logo i {
+            color: #8AB2A6 !important;
+            font-size: 1.8rem !important;
+        }
+        
+        .nav-links {
+            display: flex !important;
+            align-items: center !important;
+            gap: 2.5rem !important;
+        }
+        
+        .nav-links li a {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            padding: 8px 16px !important;
+            border-radius: 6px !important;
+            transition: all 0.3s ease !important;
+            color: #E8E9ED !important;
+            text-decoration: none !important;
+            font-weight: 500 !important;
+        }
+        
+        .nav-links li a:hover {
+            background: rgba(138, 178, 166, 0.2) !important;
+            color: #8AB2A6 !important;
+        }
+        
+        .nav-links li a.active {
+            background: #8AB2A6 !important;
+            color: white !important;
+        }
+        
+        .admin-profile {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .admin-profile:hover {
+            background: rgba(138, 178, 166, 0.2) !important;
+        }
+        
+        .admin-profile img {
+            width: 35px !important;
+            height: 35px !important;
+            border-radius: 50% !important;
+            border: 2px solid #8AB2A6 !important;
+            object-fit: cover !important;
+        }
+        
+        .admin-profile div p {
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            color: white !important;
+            margin: 0 !important;
+            line-height: 1.2 !important;
+        }
+        
+        .admin-profile div small {
+            font-size: 11px !important;
+            color: #8AB2A6 !important;
+            opacity: 0.9 !important;
+        }
+
         /* Dashboard specific additions aligned to provided static HTML & screenshot */
         .profile-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;}
         .profile-header h2 {font-weight:600;margin:0;}
@@ -54,21 +135,35 @@
     <nav class="navbar">
         <div class="logo">
             <i class="fas fa-hands-helping"></i>
-            <h1>Floodguard Network</h1>
+            <h1>HelpHub</h1>
         </div>
-        <div class="nav-links">
-            <a href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Home</span></a>
-            <a href="{{ route('donor.dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
-            <a href="{{ route('donor.distribution-repository') }}"><i class="fas fa-archive"></i> <span>Distribution Repo</span></a>
-            <div class="admin-profile" style="cursor: pointer;" onclick="window.location.href='{{ route('donor.edit-profile') }}'">
-                <img src="{{ Auth::user()->profile_picture ? asset(Auth::user()->profile_picture) : 'https://randomuser.me/api/portraits/men/32.jpg' }}" alt="Donor">
-                <div>
-                    <p>{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</p>
-                    <small>Donor</small>
+        <ul class="nav-links">
+            <li><a href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Home</span></a></li>
+            <li><a href="{{ route('donor.dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="{{ route('donor.donations') }}"><i class="fas fa-hand-holding-heart"></i> <span>My Donations</span></a></li>
+            <li><a href="{{ route('donor.distribution-repository') }}"><i class="fas fa-truck"></i> <span>Distribution Repo</span></a></li>
+            <li>
+                <div class="admin-profile" style="cursor: pointer;" onclick="window.location.href='{{ route('donor.edit-profile') }}'">
+                    @if(Auth::user()->profile_image)
+                        <img src="{{ asset('uploads/profiles/' . Auth::user()->profile_image) }}" alt="Donor Profile">
+                    @else
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->first_name . '+' . Auth::user()->last_name) }}&background=8AB2A6&color=ffffff&size=35" alt="Donor Profile">
+                    @endif
+                    <div>
+                        <p>{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</p>
+                        <small>Donor</small>
+                    </div>
                 </div>
-            </div>
-            <a href="#" class="logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fas fa-sign-out-alt"></i></a>
-        </div>
+            </li>
+            <li>
+                <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                    @csrf
+                    <button type="submit" class="logout-btn" style="background: none; border: none; color: var(--text-light); cursor: pointer;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </form>
+            </li>
+        </ul>
     </nav>
 
     <main class="main-content">
@@ -76,9 +171,22 @@
         <section class="volunteer-hero" style="margin-bottom:25px;">
             <div class="volunteer-profile" style="background:#fff;border-radius:8px;padding:24px;border:1px solid #e5e7eb;">
                 <div class="profile-header">
-                    <div>
-                        <h2>{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</h2>
-                        <p class="volunteer-id">Donor ID: {{ Auth::user()->user_id ?? 'USER-'.time() }}</p>
+                    <div style="display:flex;align-items:center;gap:20px;">
+                        <div class="profile-image-wrapper" style="width:70px;height:70px;border-radius:50%;overflow:hidden;border:3px solid #8AB2A6;">
+                            @if(Auth::user()->profile_image)
+                                <img src="{{ asset('uploads/profiles/' . Auth::user()->profile_image) }}" 
+                                     alt="Donor Profile" 
+                                     style="width:100%;height:100%;object-fit:cover;">
+                            @else
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->first_name . '+' . Auth::user()->last_name) }}&background=8AB2A6&color=ffffff&size=70" 
+                                     alt="Donor Profile" 
+                                     style="width:100%;height:100%;object-fit:cover;">
+                            @endif
+                        </div>
+                        <div>
+                            <h2>{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</h2>
+                            <p class="volunteer-id">Donor ID: {{ Auth::user()->user_id ?? 'USER-'.time() }}</p>
+                        </div>
                     </div>
                 </div>
                 <div class="profile-stats">
@@ -143,22 +251,22 @@
             <form id="donationForm" class="report-form compact" method="POST" action="{{ route('donor.submit-donation') }}">
                 @csrf
                 <div class="donation-type-row">
-                    <label class="option"><input type="radio" name="donation_type" value="money" required> Money</label>
+                    <label class="option"><input type="radio" name="donation_type" value="money" required checked> Money</label>
                     <label class="option"><input type="radio" name="donation_type" value="food"> Food</label>
                     <label class="option"><input type="radio" name="donation_type" value="clothing"> Clothing</label>
                     <label class="option"><input type="radio" name="donation_type" value="medicine"> Medicine</label>
                     <label class="option"><input type="radio" name="donation_type" value="other"> Other</label>
                 </div>
 
-                <div id="moneyFields" class="conditional-block">
+                <div id="moneyFields" class="conditional-block active">
                     <div class="inline-fields">
                         <div class="form-group">
                             <label>Amount (USD) *</label>
-                            <input type="number" step="0.01" name="money_amount" placeholder="e.g. 150" />
+                            <input type="number" step="0.01" name="money_amount" placeholder="e.g. 150" required />
                         </div>
                         <div class="form-group">
                             <label>Payment Method *</label>
-                            <select name="payment_method">
+                            <select name="payment_method" required>
                                 <option value="">Select method</option>
                                 <option value="bank">Bank Transfer</option>
                                 <option value="mobile">Mobile Payment</option>
@@ -168,7 +276,7 @@
                         </div>
                         <div class="form-group">
                             <label>Transaction ID *</label>
-                            <input type="text" name="transaction_id" placeholder="Enter transaction reference" />
+                            <input type="text" name="transaction_id" placeholder="Enter transaction reference" required />
                         </div>
                     </div>
                 </div>
@@ -225,7 +333,7 @@
                             @if($donation->donation_type === 'money')
                                 Monetary donation of ${{ number_format($donation->amount,2) }}.
                             @else
-                                {{ ucfirst($donation->donation_type) }} donation: {{ $donation->items ?? $donation->description }} (Qty: {{ $donation->quantity ?? '1' }}).
+                                {{ ucfirst($donation->donation_type) }} donation: {{ $donation->description }} (Qty: {{ $donation->quantity }}).
                             @endif
                         </div>
                         <a class="view-link" href="{{ route('donor.view-donation', $donation->donation_id) }}">View Details</a>
@@ -255,11 +363,9 @@
                 // Clear all required attributes
                 moneyFields.querySelectorAll('input,select,textarea').forEach(el => {
                     el.required = false;
-                    el.disabled = false; // Ensure fields are not disabled
                 });
                 itemFields.querySelectorAll('input,select,textarea').forEach(el => {
                     el.required = false;
-                    el.disabled = false; // Ensure fields are not disabled
                 });
                 
                 if(val === 'money'){
@@ -274,16 +380,26 @@
                     if(txField) txField.required = true;
                 } else if(val) {
                     itemFields.classList.add('active');
-                    itemFields.querySelector('input[name="item_quantity"]').required = true;
-                    itemFields.querySelector('textarea[name="description"]').required = true;
-                }
+                    const quantityField = itemFields.querySelector('input[name="item_quantity"]');
+                    const descField = itemFields.querySelector('textarea[name="description"]');
+                    if(quantityField) quantityField.required = true;
+                    if(descField) descField.required = true;
                 }
             }
             
+            // Initialize on page load
+            updateBlocks();
+            
             radios.forEach(r => r.addEventListener('change', updateBlocks));
             resetBtn.addEventListener('click', () => {
-                moneyFields.classList.remove('active');
-                itemFields.classList.remove('active');
+                setTimeout(() => {
+                    // Reset to default state (money selected and active)
+                    const moneyRadio = document.querySelector('input[name="donation_type"][value="money"]');
+                    if(moneyRadio) {
+                        moneyRadio.checked = true;
+                        updateBlocks();
+                    }
+                }, 10);
             });
         })();
     </script>

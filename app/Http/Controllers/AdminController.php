@@ -19,20 +19,14 @@ class AdminController extends Controller
         }
         
         try {
-            // Get dashboard statistics
+            // Get basic statistics
             $stats = [
                 'volunteers' => User::where('role', 'volunteer')->count(),
                 'donors' => User::where('role', 'donor')->count(),
-                'total_donations' => Donation::where('status', 'approved')->sum('amount'),
-                'distributions' => DB::table('distribution_records')->sum('quantity') ?? 0,
-                'locations' => DB::table('victims')->distinct('location')->count('location') ?? 0
+                'total_donations' => Donation::where('status', 'approved')->sum('amount') ?? 0,
+                'distributions' => 0, // Simplified for now
+                'locations' => 0 // Simplified for now
             ];
-
-            // Get recent donations with donor information
-            $recentDonations = Donation::with('user')
-                ->orderBy('donation_date', 'desc')
-                ->limit(5)
-                ->get();
 
             // Get pending donations for approval
             $pendingDonations = Donation::with('user')
@@ -40,11 +34,30 @@ class AdminController extends Controller
                 ->orderBy('donation_date', 'desc')
                 ->get();
 
-            return view('admin.dashboard', compact('stats', 'recentDonations', 'pendingDonations'));
+            // Get volunteers with availability status - SIMPLIFIED
+            $volunteers = User::where('role', 'volunteer')
+                ->leftJoin('volunteer_profiles', 'users.user_id', '=', 'volunteer_profiles.volunteer_id')
+                ->select(
+                    'users.user_id',
+                    'users.first_name', 
+                    'users.last_name',
+                    'users.phone',
+                    'volunteer_profiles.is_available'
+                )
+                ->orderBy('volunteer_profiles.is_available', 'desc')
+                ->get();
+
+            // Get basic victims data - UPDATED to show actual data
+            $victims = DB::table('victims')
+                ->select('victim_id', 'name', 'location', 'relief_needed', 'status', 'created_at')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return view('admin.dashboard', compact('stats', 'pendingDonations', 'volunteers', 'victims'));
             
         } catch (\Exception $e) {
             \Log::error('Error in admin dashboard', ['error' => $e->getMessage()]);
-            return redirect()->route('login')->with('error', 'Error loading dashboard');
+            return redirect()->route('login')->with('error', 'Error loading dashboard: ' . $e->getMessage());
         }
     }
 
