@@ -562,8 +562,9 @@ Special thanks to:
 ---
 
 <p align="center">
-    <strong>Built with ❤️ for flood relief coordination and community resilience</strong><br>
+    <strong>Built with ❤️ By Mehedi for flood relief coordination and community resilience</strong><br>
     <em>Helping communities prepare, respond, and recover from flood disasters</em>
+    <em>BTW Mehedi Bonnay Haray Nai !!!</em>
 </p>
 
 <p align="center">
