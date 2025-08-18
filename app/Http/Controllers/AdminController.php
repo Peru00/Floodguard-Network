@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Donation;
 use App\Models\ReliefCamp;
 use App\Models\ChatMessage;
+use App\Models\VolunteerTask;
 
 class AdminController extends Controller
 {
@@ -800,6 +801,82 @@ class AdminController extends Controller
                 'success' => false,
                 'message' => 'Error loading volunteers: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function assignTask(Request $request)
+    {
+        try {
+            // Custom validation rules based on task title type
+            $rules = [
+                'volunteer_id' => 'required|string|exists:users,user_id',
+                'task_title_type' => 'required|in:victim_related,other',
+                'task_description' => 'required|string',
+                'priority' => 'required|in:high,medium,low',
+                'task_type' => 'required|in:relief_distribution,medical_assistance,evacuation_support,communication,logistics,data_collection,other',
+                'due_date' => 'required|date|after:now',
+                'location' => 'nullable|string|max:255',
+                'notes' => 'nullable|string'
+            ];
+
+            // Add conditional validation based on task title type
+            if ($request->task_title_type === 'victim_related') {
+                $rules['victim_id'] = 'required|string|exists:victims,victim_id';
+            } else if ($request->task_title_type === 'other') {
+                $rules['custom_task_title'] = 'required|string|max:255';
+            }
+
+            $request->validate($rules);
+
+            // Determine the task title
+            $taskTitle = '';
+            $victimId = null;
+            
+            if ($request->task_title_type === 'victim_related') {
+                // Get victim details to create a meaningful title
+                $victim = DB::table('victims')->where('victim_id', $request->victim_id)->first();
+                if ($victim) {
+                    $taskTitle = "Assist {$victim->name} - {$victim->location}";
+                    $victimId = $request->victim_id;
+                } else {
+                    return redirect()->back()->with('error', 'Selected victim not found.');
+                }
+            } else {
+                $taskTitle = $request->custom_task_title;
+            }
+
+            // Create the task
+            $task = VolunteerTask::create([
+                'volunteer_id' => $request->volunteer_id,
+                'assigned_by' => Auth::id(),
+                'title' => $taskTitle,
+                'description' => $request->task_description,
+                'priority' => $request->priority,
+                'task_type' => $request->task_type,
+                'location' => $request->location,
+                'due_date' => $request->due_date,
+                'notes' => $request->notes,
+                'victim_id' => $victimId, // Store victim ID if it's a victim-related task
+                'status' => 'pending'
+            ]);
+
+            // Get volunteer name for success message
+            $volunteer = User::where('user_id', $request->volunteer_id)->first();
+            $volunteerName = $volunteer ? $volunteer->first_name . ' ' . $volunteer->last_name : 'Unknown';
+
+            return redirect()->back()->with('success', 
+                "Task '{$taskTitle}' has been successfully assigned to {$volunteerName}."
+            );
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput()
+                ->with('error', 'Please check the form for errors.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 
+                'Error assigning task: ' . $e->getMessage()
+            );
         }
     }
 }

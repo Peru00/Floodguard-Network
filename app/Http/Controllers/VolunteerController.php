@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\VolunteerProfile;
 use App\Models\ChatMessage;
+use App\Models\VolunteerTask;
 
 class VolunteerController extends Controller
 {
@@ -32,7 +33,7 @@ class VolunteerController extends Controller
             }
             
             // Get assigned tasks (using distribution_tasks as task assignments)
-            $tasks = DB::table('distribution_tasks as dt')
+            $distributionTasks = DB::table('distribution_tasks as dt')
                 ->join('users as v', 'dt.volunteer_id', '=', 'v.user_id')
                 ->join('victims as vic', 'dt.victim_id', '=', 'vic.victim_id')
                 ->join('inventory as i', 'dt.inventory_id', '=', 'i.inventory_id')
@@ -43,18 +44,30 @@ class VolunteerController extends Controller
                     'vic.name as victim_name',
                     'vic.priority',
                     'i.item_name as relief_type',
-                    'i.item_name'
+                    'i.item_name',
+                    DB::raw("'distribution' as task_category")
                 )
                 ->orderBy('vic.priority', 'desc')
                 ->orderBy('dt.assigned_date', 'asc')
                 ->get();
+
+            // Get volunteer tasks assigned by admin
+            $volunteerTasks = VolunteerTask::with(['assignedBy'])
+                ->where('volunteer_id', $user->user_id)
+                ->where('status', '!=', 'completed')
+                ->orderBy('priority', 'desc')
+                ->orderBy('due_date', 'asc')
+                ->get();
+
+            // Combine both types of tasks
+            $tasks = $distributionTasks;
             
             // Get completed distributions count
             $completedDistributions = DB::table('distribution_records')
                 ->where('volunteer_id', $user->user_id)
                 ->count();
             
-            return view('volunteer.dashboard', compact('volunteerInfo', 'tasks', 'completedDistributions'));
+            return view('volunteer.dashboard', compact('volunteerInfo', 'tasks', 'volunteerTasks', 'completedDistributions'));
             
         } catch (\Exception $e) {
             \Log::error('Error in volunteer dashboard', ['error' => $e->getMessage()]);

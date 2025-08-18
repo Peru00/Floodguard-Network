@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/donation/update-status', [AdminController::class, 'updateDonationStatus'])->name('donation.update-status');
         Route::post('/add-victim', [AdminController::class, 'addVictim'])->name('add-victim');
         Route::post('/add-volunteer', [AdminController::class, 'addVolunteer'])->name('add-volunteer');
+        Route::post('/assign-task', [AdminController::class, 'assignTask'])->name('assign-task');
     });
     
     // Donor routes

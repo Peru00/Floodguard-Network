@@ -262,6 +262,27 @@
             50% { opacity: 0.3; }
         }
 
+        /* Enhanced button styles for modal */
+        .btn.btn-secondary {
+            transition: all 0.3s ease;
+        }
+
+        .btn.btn-secondary:hover {
+            background: #ffcdd2 !important;
+            color: #c62828 !important;
+            border-color: #ef9a9a !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
+        }
+
+        .btn.btn-primary:hover {
+            background: #c8e6c8 !important;
+            color: #1b5e20 !important;
+            border-color: #a5d6a5 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
+        }
+
         /* Button toggle styles */
         .btn.active {
             background-color: #3498db !important;
@@ -840,6 +861,7 @@
                                     <th>Phone</th>
                                     <th>Availability</th>
                                     <th>Assigned Tasks</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -863,10 +885,15 @@
                                         <td>
                                             <span style="color: #7f8c8d;">No tasks</span>
                                         </td>
+                                        <td>
+                                            <button class="action-btn" style="background-color: #28a745; color: white;" onclick="openAssignTaskModal('{{ $volunteer->user_id }}', '{{ $volunteer->first_name }} {{ $volunteer->last_name }}')" title="Assign New Task">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr id="no-volunteers-message">
-                                        <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
+                                        <td colspan="6" style="text-align: center; padding: 2rem; color: #666;">
                                             <i class="fas fa-hands-helping"></i><br>
                                             <span id="no-volunteers-text">No available volunteers</span>
                                         </td>
@@ -1109,6 +1136,155 @@
         </div>
     </div>
 
+    <!-- Assign Task Modal -->
+    <div id="assignTaskModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px; height: 85vh; margin: 2% auto;">
+            <div class="modal-header">
+                <h3>Assign Task to <span id="selectedVolunteerName">Volunteer</span></h3>
+                <span class="close" onclick="closeAssignTaskModal()">&times;</span>
+            </div>
+            <div class="modal-body" style="height: calc(85vh - 180px); overflow-y: auto; padding: 20px;">
+                <form method="POST" action="{{ route('admin.assign-task') }}" id="assignTaskForm">
+                    @csrf
+                    <input type="hidden" name="volunteer_id" id="assignVolunteerId">
+                    
+                    <!-- Horizontal Card Layout -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                        
+                        <!-- Task Details Card (Blue) -->
+                        <div style="background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 8px; padding: 20px; min-height: 300px;">
+                            <h4 style="margin: 0 0 15px 0; color: #1976d2; text-align: center;"><i class="fas fa-clipboard-list"></i> Task Details</h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label" style="font-size: 14px; font-weight: bold;">Task Title Type *</label>
+                                <select name="task_title_type" id="taskTitleType" class="form-select" required onchange="toggleTaskTitleInput()" style="font-size: 14px; padding: 8px;">
+                                    <option value="">Select type</option>
+                                    <option value="victim_related">👥 Victim Related</option>
+                                    <option value="other">🔧 Custom Task</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" id="victimSelectionGroup" style="display: none;">
+                                <label class="form-label" style="font-size: 14px; font-weight: bold;">Select Victim *</label>
+                                <select name="victim_id" id="victimSelect" class="form-select" style="font-size: 14px; padding: 8px;" onchange="updateVictimDetails()">
+                                    <option value="">Choose victim...</option>
+                                    @if(isset($victims))
+                                        @foreach($victims as $victim)
+                                            <option value="{{ $victim->victim_id }}" 
+                                                    data-priority="{{ $victim->priority }}" 
+                                                    data-needs="{{ $victim->needs }}"
+                                                    data-location="{{ $victim->location }}"
+                                                    data-family-size="{{ $victim->family_size }}">
+                                                {{ $victim->name }} - {{ $victim->location }} (Priority: {{ ucfirst($victim->priority) }})
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" id="customTaskTitleGroup" style="display: none;">
+                                <label class="form-label" style="font-size: 14px; font-weight: bold;">Custom Title *</label>
+                                <input type="text" name="custom_task_title" id="customTaskTitle" class="form-input" placeholder="Enter title" style="font-size: 14px; padding: 8px;">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" style="font-size: 14px; font-weight: bold;">Description *</label>
+                                <textarea name="task_description" class="form-textarea" required placeholder="Task instructions..." style="min-height: 80px; font-size: 14px; padding: 8px;"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Task Description Card (Green) -->
+                        <div style="background: #e8f5e8; border-left: 4px solid #4caf50; border-radius: 8px; padding: 20px; min-height: 300px;">
+                            <h4 style="margin: 0 0 15px 0; color: #388e3c; text-align: center;"><i class="fas fa-tasks"></i> Task Category</h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label" style="font-size: 14px; font-weight: bold;">Task Type *</label>
+                                <select name="task_type" class="form-select" required style="font-size: 14px; padding: 8px;">
+                                    <option value="">Select category</option>
+                                    <option value="relief_distribution">📦 Relief Distribution</option>
+                                    <option value="medical_assistance">🏥 Medical Assistance</option>
+                                    <option value="evacuation_support">🚁 Evacuation Support</option>
+                                    <option value="communication">📞 Communication</option>
+                                    <option value="logistics">🚛 Logistics</option>
+                                    <option value="data_collection">📊 Data Collection</option>
+                                    <option value="other">🔧 Other Tasks</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" style="font-size: 14px; font-weight: bold;">Location</label>
+                                <input type="text" name="location" class="form-input" placeholder="Task location (optional)" style="font-size: 14px; padding: 8px;">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" style="font-size: 14px; font-weight: bold;">Additional Notes</label>
+                                <textarea name="notes" class="form-textarea" placeholder="Special instructions..." style="min-height: 100px; font-size: 14px; padding: 8px;"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Priority Level Card (Red) -->
+                        <div style="background: #ffebee; border-left: 4px solid #f44336; border-radius: 8px; padding: 20px; min-height: 300px;">
+                            <h4 style="margin: 0 0 15px 0; color: #d32f2f; text-align: center;"><i class="fas fa-exclamation-triangle"></i> Priority Level</h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label" style="font-size: 14px; font-weight: bold;">Priority *</label>
+                                <select name="priority" class="form-select" required style="font-size: 14px; padding: 8px;">
+                                    <option value="">Select priority</option>
+                                    <option value="high">🔴 High Priority</option>
+                                    <option value="medium">🟡 Medium Priority</option>
+                                    <option value="low">🟢 Low Priority</option>
+                                </select>
+                            </div>
+                            
+                            <div style="background: #fff; border-radius: 6px; padding: 15px; margin-top: 20px; border: 1px solid #ffcdd2;">
+                                <h5 style="margin: 0 0 10px 0; color: #d32f2f;">Priority Guidelines:</h5>
+                                <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #666;">
+                                    <li><strong>High:</strong> Urgent, life-threatening situations</li>
+                                    <li><strong>Medium:</strong> Important but not critical</li>
+                                    <li><strong>Low:</strong> Can be done when available</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Due Date Card (Orange) -->
+                        <div style="background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; padding: 20px; min-height: 300px;">
+                            <h4 style="margin: 0 0 15px 0; color: #f57c00; text-align: center;"><i class="fas fa-calendar-alt"></i> Due Date</h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label" style="font-size: 14px; font-weight: bold;">Due Date & Time *</label>
+                                <input type="datetime-local" name="due_date" class="form-input" required style="font-size: 14px; padding: 8px;">
+                            </div>
+                            
+                            <div style="background: #fff; border-radius: 6px; padding: 15px; margin-top: 20px; border: 1px solid #ffcc02;">
+                                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                    <i class="fas fa-info-circle" style="color: #ff9800; margin-top: 2px;"></i>
+                                    <div>
+                                        <strong style="color: #f57c00; font-size: 13px;">Notice:</strong>
+                                        <p style="margin: 5px 0 0 0; font-size: 12px; line-height: 1.4; color: #666;">
+                                            The volunteer will be notified immediately and can track this task in their dashboard.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Action Buttons at Bottom -->
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 25px; background: #f8f9fa; border-top: 2px solid #e9ecef; border-radius: 0 0 8px 8px;">
+                <div style="display: flex; justify-content: center; gap: 25px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeAssignTaskModal()" style="padding: 15px 40px; font-size: 16px; min-width: 180px; background: #ffebee; color: #d32f2f; border: 2px solid #ffcdd2;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" form="assignTaskForm" style="padding: 15px 40px; font-size: 16px; min-width: 180px; background: #e8f5e8; color: #2e7d32; border: 2px solid #c8e6c8;">
+                        <i class="fas fa-paper-plane"></i> Assign Task
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Store donation data for modal display
         const donationData = {
@@ -1181,11 +1357,114 @@
             document.getElementById('addVolunteerModal').style.display = 'none';
         }
 
+        // Assign Task Modal functions
+        function openAssignTaskModal(volunteerId, volunteerName) {
+            document.getElementById('assignTaskModal').style.display = 'block';
+            document.getElementById('selectedVolunteerName').textContent = volunteerName;
+            document.getElementById('assignVolunteerId').value = volunteerId;
+            
+            // Set minimum date to today
+            const today = new Date();
+            const dateString = today.toISOString().slice(0, 16);
+            document.querySelector('input[name="due_date"]').min = dateString;
+        }
+
+        function closeAssignTaskModal() {
+            document.getElementById('assignTaskModal').style.display = 'none';
+            document.getElementById('assignTaskForm').reset();
+            // Reset visibility of conditional fields
+            document.getElementById('victimSelectionGroup').style.display = 'none';
+            document.getElementById('customTaskTitleGroup').style.display = 'none';
+        }
+
+        // Toggle between victim selection and custom task title
+        function toggleTaskTitleInput() {
+            const taskTitleType = document.getElementById('taskTitleType').value;
+            const victimGroup = document.getElementById('victimSelectionGroup');
+            const customGroup = document.getElementById('customTaskTitleGroup');
+            const victimSelect = document.getElementById('victimSelect');
+            const customTitle = document.getElementById('customTaskTitle');
+            
+            if (taskTitleType === 'victim_related') {
+                victimGroup.style.display = 'block';
+                customGroup.style.display = 'none';
+                victimSelect.required = true;
+                customTitle.required = false;
+                customTitle.value = '';
+            } else if (taskTitleType === 'other') {
+                victimGroup.style.display = 'none';
+                customGroup.style.display = 'block';
+                victimSelect.required = false;
+                customTitle.required = true;
+                victimSelect.value = '';
+                // Reset auto-filled fields when switching to custom
+                document.querySelector('select[name="priority"]').value = '';
+                document.querySelector('select[name="task_type"]').value = '';
+                document.querySelector('input[name="location"]').value = '';
+                document.querySelector('textarea[name="task_description"]').value = '';
+            } else {
+                victimGroup.style.display = 'none';
+                customGroup.style.display = 'none';
+                victimSelect.required = false;
+                customTitle.required = false;
+                victimSelect.value = '';
+                customTitle.value = '';
+            }
+        }
+
+        // Update victim details automatically when a victim is selected
+        function updateVictimDetails() {
+            const victimSelect = document.getElementById('victimSelect');
+            const selectedOption = victimSelect.options[victimSelect.selectedIndex];
+            
+            if (selectedOption.value) {
+                const priority = selectedOption.getAttribute('data-priority');
+                const needs = selectedOption.getAttribute('data-needs');
+                const location = selectedOption.getAttribute('data-location');
+                const familySize = selectedOption.getAttribute('data-family-size');
+                
+                // Update priority dropdown
+                const prioritySelect = document.querySelector('select[name="priority"]');
+                prioritySelect.value = priority;
+                
+                // Auto-suggest task type based on victim needs
+                const taskTypeSelect = document.querySelector('select[name="task_type"]');
+                const needsLower = needs.toLowerCase();
+                
+                if (needsLower.includes('food') || needsLower.includes('water') || needsLower.includes('supplies')) {
+                    taskTypeSelect.value = 'relief_distribution';
+                } else if (needsLower.includes('medical') || needsLower.includes('health') || needsLower.includes('medicine')) {
+                    taskTypeSelect.value = 'medical_assistance';
+                } else if (needsLower.includes('evacuation') || needsLower.includes('rescue') || needsLower.includes('transport')) {
+                    taskTypeSelect.value = 'evacuation_support';
+                } else if (needsLower.includes('communication') || needsLower.includes('contact') || needsLower.includes('phone')) {
+                    taskTypeSelect.value = 'communication';
+                } else {
+                    taskTypeSelect.value = 'other';
+                }
+                
+                // Auto-fill location
+                document.querySelector('input[name="location"]').value = location;
+                
+                // Auto-generate task description based on victim details
+                const descriptionTextarea = document.querySelector('textarea[name="task_description"]');
+                const victimName = selectedOption.text.split(' - ')[0];
+                descriptionTextarea.value = `Assist ${victimName} and family (${familySize} members) at ${location}. Priority: ${priority.toUpperCase()}. Specific needs: ${needs}`;
+            } else {
+                // Clear fields when no victim is selected
+                document.querySelector('select[name="priority"]').value = '';
+                document.querySelector('select[name="task_type"]').value = '';
+                document.querySelector('input[name="location"]').value = '';
+                document.querySelector('textarea[name="task_description"]').value = '';
+            }
+        }
+
         // Close modal when clicking outside of it
         window.onclick = function(event) {
             const donationModal = document.getElementById('donationModal');
             const victimModal = document.getElementById('addVictimModal');
             const volunteerModal = document.getElementById('addVolunteerModal');
+            const assignTaskModal = document.getElementById('assignTaskModal');
             
             if (event.target == donationModal) {
                 closeDonationModal();
@@ -1193,6 +1472,8 @@
                 closeAddVictimModal();
             } else if (event.target == volunteerModal) {
                 closeAddVolunteerModal();
+            } else if (event.target == assignTaskModal) {
+                closeAssignTaskModal();
             }
         }
 
