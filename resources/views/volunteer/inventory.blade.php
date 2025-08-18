@@ -388,11 +388,12 @@
     <nav class="navbar">
         <div class="logo">
             <i class="fas fa-hands-helping"></i>
-            <h1>HelpHub</h1>
+            <h1>FloodGuard Volunteer</h1>
         </div>
         <ul class="nav-links">
             <li><a href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Home</span></a></li>
             <li><a href="{{ route('volunteer.dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="{{ route('volunteer.relief-camps') }}"><i class="fas fa-campground"></i> <span>My Relief Camp</span></a></li>
             <li><a href="{{ route('volunteer.inventory') }}" class="active"><i class="fas fa-boxes"></i> <span>Inventory</span></a></li>
             <li><a href="{{ route('volunteer.victims') }}"><i class="fas fa-users"></i> <span>Victims</span></a></li>
             <li><a href="{{ route('volunteer.distribution-repository') }}"><i class="fas fa-truck"></i> <span>Distribution Repo</span></a></li>

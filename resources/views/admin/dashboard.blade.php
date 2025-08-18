@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin Dashboard - Floodguard Network</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -271,6 +272,268 @@
             background-color: #ecf0f1;
             color: #7f8c8d;
         }
+
+        /* Chat Communication Styles */
+        .chat-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 600px;
+        }
+
+        .chat-layout {
+            display: flex;
+            height: 100%;
+        }
+
+        .volunteer-list {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .volunteer-list h3 {
+            padding: 15px;
+            margin: 0;
+            background: #3498db;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .volunteer-search {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .volunteer-items {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .volunteer-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .volunteer-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .volunteer-item.selected {
+            background-color: #e3f2fd;
+            border-left: 3px solid #3498db;
+        }
+
+        .volunteer-info {
+            flex: 1;
+        }
+
+        .volunteer-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .volunteer-status {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .volunteer-status.online {
+            color: #28a745;
+        }
+
+        .volunteer-status.offline {
+            color: #dc3545;
+        }
+
+        .volunteer-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .volunteer-indicator.online {
+            background-color: #28a745;
+            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
+        }
+
+        .volunteer-indicator.offline {
+            background-color: #dc3545;
+        }
+
+        .no-volunteers {
+            text-align: center;
+            padding: 30px 15px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .chat-interface {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .welcome-message i {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.sent {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message.received .message-content {
+            background: #f1f3f4;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.sent .message-content {
+            background: #3498db;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-text {
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .message-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .chat-input-container {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .message-input-area {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.4;
+            max-height: 100px;
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .image-btn, .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .image-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .image-btn:hover {
+            background: #5a6268;
+        }
+
+        .send-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .send-btn:hover {
+            background: #2980b9;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -284,7 +547,7 @@
             <li><a href="{{ route('home') }}"><i class="fas fa-home"></i> Home</a></li>
             <li class="active"><a href="{{ route('admin.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
             <li><a href="{{ route('admin.user-management') }}"><i class="fas fa-users-cog"></i> User Management</a></li>
-            <li><a href="#"><i class="fas fa-campground"></i> Relief Camps</a></li>
+            <li><a href="{{ route('admin.relief-camps') }}"><i class="fas fa-campground"></i> Relief Camps</a></li>
             <li><a href="#"><i class="fas fa-box-open"></i> Inventory</a></li>
             <li><a href="#"><i class="fas fa-donate"></i> Donations</a></li>
             <li><a href="#"><i class="fas fa-box-open"></i> Distribution Repo</a></li>
@@ -613,6 +876,75 @@
                         </table>
                     </div>
                 </section>
+
+                <!-- Chat Communication Section -->
+                <section class="donations-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-comments"></i> Volunteer Communication</h2>
+                        <div class="section-actions">
+                            <button id="refreshChatBtn" class="btn btn-secondary" onclick="refreshChatList()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chat-container">
+                        <div class="chat-layout">
+                            <!-- Volunteer List -->
+                            <div class="volunteer-list">
+                                <h3>Select Volunteer</h3>
+                                <div class="volunteer-search">
+                                    <input type="text" id="volunteerSearch" placeholder="Search volunteers..." class="search-input">
+                                </div>
+                                <div class="volunteer-items">
+                                    @forelse($volunteers as $volunteer)
+                                        <div class="volunteer-item" onclick="selectVolunteer('{{ $volunteer->user_id }}', '{{ $volunteer->first_name }} {{ $volunteer->last_name }}')">
+                                            <div class="volunteer-info">
+                                                <div class="volunteer-name">{{ $volunteer->first_name }} {{ $volunteer->last_name }}</div>
+                                                <div class="volunteer-status {{ $volunteer->is_available ? 'online' : 'offline' }}">
+                                                    {{ $volunteer->is_available ? 'Available' : 'Unavailable' }}
+                                                </div>
+                                            </div>
+                                            <div class="volunteer-indicator {{ $volunteer->is_available ? 'online' : 'offline' }}"></div>
+                                        </div>
+                                    @empty
+                                        <div class="no-volunteers">No volunteers available</div>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            <!-- Chat Interface -->
+                            <div class="chat-interface">
+                                <div class="chat-header">
+                                    <div id="selectedVolunteerName">Select a volunteer to start chatting</div>
+                                </div>
+                                <div class="chat-messages" id="chatMessages">
+                                    <div class="welcome-message">
+                                        <i class="fas fa-comments"></i>
+                                        <p>Select a volunteer from the list to start a conversation</p>
+                                    </div>
+                                </div>
+                                <div class="chat-input-container">
+                                    <form id="chatForm" enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" id="selectedVolunteerId" name="volunteer_id">
+                                        <div class="message-input-area">
+                                            <textarea id="messageInput" name="message" placeholder="Type your message..." rows="2"></textarea>
+                                            <div class="chat-actions">
+                                                <label for="imageInput" class="image-btn" title="Send Image">
+                                                    <i class="fas fa-image"></i>
+                                                    <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
+                                                </label>
+                                                <button type="submit" class="send-btn" title="Send Message">
+                                                    <i class="fas fa-paper-plane"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
@@ -912,6 +1244,278 @@
                 noVolunteersMessage.style.display = unavailableCount === 0 ? '' : 'none';
             }
         }
+
+        // Chat functionality
+        let selectedVolunteerId = null;
+        let selectedVolunteerName = '';
+
+        function selectVolunteer(volunteerId, volunteerName) {
+            // Remove previous selection
+            document.querySelectorAll('.volunteer-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Add selection to clicked item
+            event.currentTarget.classList.add('selected');
+
+            selectedVolunteerId = volunteerId;
+            selectedVolunteerName = volunteerName;
+
+            // Update chat header
+            document.getElementById('selectedVolunteerName').textContent = `Chat with ${volunteerName}`;
+            document.getElementById('selectedVolunteerId').value = volunteerId;
+
+            // Load chat messages
+            loadChatMessages(volunteerId);
+        }
+
+        function loadChatMessages(volunteerId) {
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // Show loading state
+            chatMessages.innerHTML = `
+                <div class="welcome-message">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading messages...</p>
+                </div>
+            `;
+
+            // Make AJAX call to load messages
+            fetch(`/admin/chat/messages/${volunteerId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.messages.length === 0) {
+                            chatMessages.innerHTML = `
+                                <div class="welcome-message">
+                                    <i class="fas fa-comments"></i>
+                                    <p>No messages yet. Start the conversation!</p>
+                                </div>
+                            `;
+                        } else {
+                            chatMessages.innerHTML = '';
+                            data.messages.forEach(message => {
+                                if (message.image_path) {
+                                    addMessageToChat(
+                                        message.sender_type === 'admin' ? 'sent' : 'received',
+                                        null,
+                                        false,
+                                        message.created_at,
+                                        message.image_path
+                                    );
+                                } else {
+                                    addMessageToChat(
+                                        message.sender_type === 'admin' ? 'sent' : 'received',
+                                        message.message,
+                                        true,
+                                        message.created_at
+                                    );
+                                }
+                            });
+                        }
+                        // Scroll to bottom
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    } else {
+                        chatMessages.innerHTML = `
+                            <div class="welcome-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error loading messages: ${data.message}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading messages:', error);
+                    chatMessages.innerHTML = `
+                        <div class="welcome-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Error loading messages. Please try again.</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // Handle chat form submission
+        document.getElementById('chatForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!selectedVolunteerId) {
+                alert('Please select a volunteer first');
+                return;
+            }
+
+            const messageInput = document.getElementById('messageInput');
+            const imageInput = document.getElementById('imageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message && !imageInput.files[0]) {
+                return;
+            }
+
+            // Disable form while sending
+            const sendBtn = document.querySelector('.send-btn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            formData.append('volunteer_id', selectedVolunteerId);
+            if (message) formData.append('message', message);
+            if (imageInput.files[0]) formData.append('image', imageInput.files[0]);
+
+            // Send message via AJAX
+            fetch('/admin/chat/send', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Add message to chat immediately
+                    if (data.chat_message.message) {
+                        addMessageToChat('sent', data.chat_message.message, true, data.chat_message.created_at);
+                    }
+                    if (data.chat_message.image_path) {
+                        addMessageToChat('sent', data.chat_message.image_url, false, data.chat_message.created_at);
+                    }
+                    
+                    // Clear inputs
+                    messageInput.value = '';
+                    imageInput.value = '';
+                    document.querySelector('label[for="imageInput"]').style.background = '#6c757d';
+                    document.querySelector('label[for="imageInput"]').title = 'Send Image';
+                } else {
+                    alert('Error sending message: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                alert('Error sending message. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable form
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            });
+        });
+
+        function addMessageToChat(type, content, isText = true, time = null, imagePath = null) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const currentTime = time || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            if (isText) {
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <div class="message-text">${content}</div>
+                        <div class="message-time">${currentTime}</div>
+                    </div>
+                `;
+            } else {
+                const imageUrl = imagePath ? `/storage/${imagePath}` : content;
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <img src="${imageUrl}" alt="Sent image" class="message-image">
+                        <div class="message-time">${currentTime}</div>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addImageToChat(type, imageSrc, scrollToBottom = true) {
+            addMessageToChat(type, imageSrc, false);
+        }
+
+        // Handle image input change
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            if (e.target.files[0]) {
+                const fileName = e.target.files[0].name;
+                const label = document.querySelector('label[for="imageInput"]');
+                label.title = `Selected: ${fileName}`;
+                label.style.background = '#2980b9';
+            }
+        });
+
+        // Auto-resize textarea
+        document.getElementById('messageInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        // Search volunteers
+        document.getElementById('volunteerSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const volunteerItems = document.querySelectorAll('.volunteer-item');
+            
+            volunteerItems.forEach(item => {
+                const volunteerName = item.querySelector('.volunteer-name').textContent.toLowerCase();
+                if (volunteerName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        function refreshChatList() {
+            // Make AJAX call to refresh volunteer list
+            const refreshBtn = document.getElementById('refreshChatBtn');
+            const icon = refreshBtn.querySelector('i');
+            
+            icon.classList.add('fa-spin');
+            
+            fetch('/admin/chat/volunteers')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update volunteer list
+                        const volunteerItems = document.querySelector('.volunteer-items');
+                        volunteerItems.innerHTML = '';
+                        
+                        if (data.volunteers.length === 0) {
+                            volunteerItems.innerHTML = '<div class="no-volunteers">No volunteers available</div>';
+                        } else {
+                            data.volunteers.forEach(volunteer => {
+                                const volunteerDiv = document.createElement('div');
+                                volunteerDiv.className = 'volunteer-item';
+                                volunteerDiv.onclick = () => selectVolunteer(volunteer.user_id, `${volunteer.first_name} ${volunteer.last_name}`);
+                                
+                                volunteerDiv.innerHTML = `
+                                    <div class="volunteer-info">
+                                        <div class="volunteer-name">${volunteer.first_name} ${volunteer.last_name}</div>
+                                        <div class="volunteer-status ${volunteer.is_available ? 'online' : 'offline'}">
+                                            ${volunteer.is_available ? 'Available' : 'Unavailable'}
+                                        </div>
+                                    </div>
+                                    <div class="volunteer-indicator ${volunteer.is_available ? 'online' : 'offline'}"></div>
+                                `;
+                                
+                                volunteerItems.appendChild(volunteerDiv);
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing chat list:', error);
+                })
+                .finally(() => {
+                    icon.classList.remove('fa-spin');
+                });
+        }
+
+        // Allow Enter to send message (Shift+Enter for new line)
+        document.getElementById('messageInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+            }
+        });
     </script>
 </body>
 </html>

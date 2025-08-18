@@ -402,7 +402,7 @@
             <li><a href="{{ route('home') }}"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="{{ route('admin.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
             <li class="active"><a href="{{ route('admin.user-management') }}"><i class="fas fa-users-cog"></i> User Management</a></li>
-            <li><a href="#"><i class="fas fa-campground"></i> Relief Camps</a></li>
+            <li><a href="{{ route('admin.relief-camps') }}"><i class="fas fa-campground"></i> Relief Camps</a></li>
             <li><a href="#"><i class="fas fa-box-open"></i> Inventory</a></li>
             <li><a href="#"><i class="fas fa-donate"></i> Donations</a></li>
             <li><a href="#"><i class="fas fa-box-open"></i> Distribution Repo</a></li>

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Donation;
+use App\Models\ReliefCamp;
+use App\Models\ChatMessage;
 
 class AdminController extends Controller
 {
@@ -516,6 +518,288 @@ class AdminController extends Controller
             \Log::error('Error deleting user', ['error' => $e->getMessage(), 'user_id' => $id]);
             return redirect()->route('admin.user-management')
                 ->with('error', 'Error deleting user: ' . $e->getMessage());
+        }
+    }
+
+    public function reliefCamps()
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
+            return redirect()->route('login')->with('error', 'Admin access required');
+        }
+
+        try {
+            // Get all relief camps with their managers
+            $camps = ReliefCamp::with('manager')
+                ->orderBy('location')
+                ->get();
+
+            // Get available volunteers for camp assignment
+            $volunteers = User::where('role', 'volunteer')
+                ->select('user_id', 'first_name', 'last_name')
+                ->orderBy('first_name')
+                ->get();
+
+            // Calculate summary statistics
+            $stats = [
+                'total_camps' => $camps->count(),
+                'total_capacity' => $camps->sum('capacity'),
+                'total_occupancy' => $camps->sum('current_occupancy'),
+                'available_spaces' => $camps->sum('capacity') - $camps->sum('current_occupancy'),
+                'full_camps' => $camps->where('occupancy_status', 'full')->count(),
+                'almost_full_camps' => $camps->where('occupancy_status', 'almost-full')->count(),
+            ];
+
+            return view('admin.relief-camps', compact('camps', 'volunteers', 'stats'));
+
+        } catch (\Exception $e) {
+            \Log::error('Error loading relief camps page', ['error' => $e->getMessage()]);
+            return redirect()->route('admin.dashboard')
+                ->with('error', 'Error loading relief camps: ' . $e->getMessage());
+        }
+    }
+
+    public function createReliefCamp(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
+            return redirect()->route('login')->with('error', 'Admin access required');
+        }
+
+        $request->validate([
+            'camp_name' => 'required|string|max:100',
+            'location' => 'required|string|max:255',
+            'capacity' => 'required|integer|min:1|max:10000',
+            'managed_by' => 'nullable|exists:users,user_id'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $camp = ReliefCamp::create([
+                'camp_id' => 'CAMP-' . time(),
+                'camp_name' => $request->camp_name,
+                'location' => $request->location,
+                'capacity' => $request->capacity,
+                'current_occupancy' => 0,
+                'managed_by' => $request->managed_by ?: null,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.relief-camps')
+                ->with('success', 'Relief camp "' . $camp->camp_name . '" created successfully');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error creating relief camp', ['error' => $e->getMessage()]);
+            return redirect()->route('admin.relief-camps')
+                ->with('error', 'Error creating relief camp: ' . $e->getMessage());
+        }
+    }
+
+    public function updateReliefCamp(Request $request, $id)
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
+            return redirect()->route('login')->with('error', 'Admin access required');
+        }
+
+        $request->validate([
+            'camp_name' => 'required|string|max:100',
+            'location' => 'required|string|max:255',
+            'capacity' => 'required|integer|min:1|max:10000',
+            'current_occupancy' => 'required|integer|min:0',
+            'managed_by' => 'nullable|exists:users,user_id'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $camp = ReliefCamp::findOrFail($id);
+
+            // Validate that current occupancy doesn't exceed capacity
+            if ($request->current_occupancy > $request->capacity) {
+                return redirect()->route('admin.relief-camps')
+                    ->with('error', 'Current occupancy cannot exceed camp capacity');
+            }
+
+            $camp->update([
+                'camp_name' => $request->camp_name,
+                'location' => $request->location,
+                'capacity' => $request->capacity,
+                'current_occupancy' => $request->current_occupancy,
+                'managed_by' => $request->managed_by ?: null,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.relief-camps')
+                ->with('success', 'Relief camp "' . $camp->camp_name . '" updated successfully');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error updating relief camp', ['error' => $e->getMessage(), 'camp_id' => $id]);
+            return redirect()->route('admin.relief-camps')
+                ->with('error', 'Error updating relief camp: ' . $e->getMessage());
+        }
+    }
+
+    public function deleteReliefCamp($id)
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
+            return redirect()->route('login')->with('error', 'Admin access required');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $camp = ReliefCamp::findOrFail($id);
+            
+            // Check if camp has current occupancy
+            if ($camp->current_occupancy > 0) {
+                return redirect()->route('admin.relief-camps')
+                    ->with('error', 'Cannot delete camp "' . $camp->camp_name . '" - it currently has ' . $camp->current_occupancy . ' occupants');
+            }
+
+            $campName = $camp->camp_name;
+            $camp->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.relief-camps')
+                ->with('success', 'Relief camp "' . $campName . '" has been deleted successfully');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error deleting relief camp', ['error' => $e->getMessage(), 'camp_id' => $id]);
+            return redirect()->route('admin.relief-camps')
+                ->with('error', 'Error deleting relief camp: ' . $e->getMessage());
+        }
+    }
+
+    // Chat functionality methods
+    public function getChatMessages($volunteerId)
+    {
+        try {
+            $adminId = Auth::user()->user_id;
+            
+            $messages = ChatMessage::conversation($adminId, $volunteerId)
+                ->with(['sender', 'receiver'])
+                ->get();
+
+            // Mark messages as read
+            ChatMessage::where('sender_id', $volunteerId)
+                ->where('receiver_id', $adminId)
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
+
+            return response()->json([
+                'success' => true,
+                'messages' => $messages->map(function ($message) {
+                    return [
+                        'id' => $message->id,
+                        'message' => $message->message,
+                        'image_path' => $message->image_path,
+                        'sender_type' => $message->sender_type,
+                        'sender_name' => $message->sender->first_name . ' ' . $message->sender->last_name,
+                        'is_read' => $message->is_read,
+                        'created_at' => $message->created_at->format('H:i'),
+                        'created_at_full' => $message->created_at->format('Y-m-d H:i:s')
+                    ];
+                })
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading messages: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function sendChatMessage(Request $request)
+    {
+        $request->validate([
+            'volunteer_id' => 'required|string|exists:users,user_id',
+            'message' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        try {
+            $adminId = Auth::user()->user_id;
+            $imagePath = null;
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $imagePath = $image->storeAs('chat_images', $imageName, 'public');
+            }
+
+            // Create chat message
+            $chatMessage = ChatMessage::create([
+                'sender_id' => $adminId,
+                'receiver_id' => $request->volunteer_id,
+                'message' => $request->message,
+                'image_path' => $imagePath,
+                'sender_type' => 'admin',
+                'is_read' => false
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Message sent successfully',
+                'chat_message' => [
+                    'id' => $chatMessage->id,
+                    'message' => $chatMessage->message,
+                    'image_path' => $chatMessage->image_path,
+                    'image_url' => $chatMessage->image_path ? asset('storage/' . $chatMessage->image_path) : null,
+                    'sender_type' => $chatMessage->sender_type,
+                    'created_at' => $chatMessage->created_at->format('H:i'),
+                    'created_at_full' => $chatMessage->created_at->format('Y-m-d H:i:s')
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error sending message: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getChatVolunteers()
+    {
+        try {
+            $volunteers = User::where('role', 'volunteer')
+                ->leftJoin('volunteer_profiles', 'users.user_id', '=', 'volunteer_profiles.volunteer_id')
+                ->select(
+                    'users.user_id',
+                    'users.first_name',
+                    'users.last_name',
+                    'volunteer_profiles.phone',
+                    'volunteer_profiles.is_available'
+                )
+                ->orderBy('volunteer_profiles.is_available', 'desc')
+                ->orderBy('users.first_name')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'volunteers' => $volunteers
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading volunteers: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

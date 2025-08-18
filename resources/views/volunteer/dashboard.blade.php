@@ -451,6 +451,259 @@
                 display: none !important;
             }
         }
+
+        /* Chat Styles */
+        .chat-container {
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .chat-layout {
+            display: flex;
+            height: 500px;
+        }
+
+        /* Admin List Styles */
+        .admin-list {
+            width: 280px;
+            background: #f8f9fa;
+            border-right: 1px solid #e1e8ed;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-list h3 {
+            padding: 20px;
+            margin: 0;
+            font-size: 16px;
+            color: #1a2b47;
+            background: #1a2b47;
+            color: white;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .admin-items {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .admin-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e8ed;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-item:hover {
+            background: #e8f4f8;
+        }
+
+        .admin-item.active {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+        }
+
+        .admin-info {
+            flex: 1;
+        }
+
+        .admin-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .admin-status {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .admin-status.online {
+            color: #27ae60;
+        }
+
+        .admin-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #bdc3c7;
+        }
+
+        .admin-indicator.online {
+            background: #27ae60;
+        }
+
+        /* Chat Interface Styles */
+        .chat-interface {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: #1a2b47;
+            color: white;
+            font-weight: 600;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafbfc;
+            max-height: 350px;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 40px 20px;
+        }
+
+        .welcome-message i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.sent {
+            justify-content: flex-end; /* Sent messages on the right like admin */
+        }
+
+        .message.received {
+            justify-content: flex-start; /* Received messages on the left like admin */
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message-text {
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .message.received .message-content {
+            background: #f1f3f4; /* Admin chat style for received messages */
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.sent .message-content {
+            background: #3498db; /* Admin chat style for sent messages */
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .message.received .message-time {
+            text-align: left;
+        }
+
+        .message.sent .message-time {
+            text-align: right;
+        }
+
+        .message-image {
+            max-width: 200px;
+            border-radius: 8px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        /* Chat Input Styles */
+        .chat-input-container {
+            border-top: 1px solid #e1e8ed;
+            background: white;
+        }
+
+        .message-input-area {
+            display: flex;
+            align-items: flex-end;
+            padding: 15px;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            border: 1px solid #e1e8ed;
+            border-radius: 20px;
+            padding: 10px 15px;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        #messageInput:focus {
+            border-color: #3498db;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .image-btn, .send-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .image-btn {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+
+        .image-btn:hover {
+            background: #bdc3c7;
+            color: #2c3e50;
+        }
+
+        .send-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .send-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
     </style>
 </head>
 <body>
@@ -458,11 +711,12 @@
     <nav class="navbar">
         <div class="logo">
             <i class="fas fa-hands-helping"></i>
-            <h1>HelpHub</h1>
+            <h1>FloodGuard Volunteer</h1>
         </div>
         <ul class="nav-links">
             <li><a href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Home</span></a></li>
             <li><a href="{{ route('volunteer.dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="{{ route('volunteer.relief-camps') }}"><i class="fas fa-campground"></i> <span>My Relief Camp</span></a></li>
             <li><a href="{{ route('volunteer.inventory') }}"><i class="fas fa-boxes"></i> <span>Inventory</span></a></li>
             <li><a href="{{ route('volunteer.victims') }}"><i class="fas fa-users"></i> <span>Victims</span></a></li>
             <li><a href="{{ route('volunteer.distribution-repository') }}"><i class="fas fa-truck"></i> <span>Distribution Repo</span></a></li>
@@ -634,6 +888,64 @@
                     @endif
                 </div>
             </section>
+
+            <!-- Admin Communication Section -->
+            <section class="assigned-tasks">
+                <div class="section-header">
+                    <h2><i class="fas fa-comments"></i> Admin Communication</h2>
+                    <button id="refreshChatBtn" class="btn btn-secondary" onclick="refreshChatMessages()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                
+                <div class="chat-container">
+                    <div class="chat-layout">
+                        <!-- Admin List (Static since volunteers only chat with admins) -->
+                        <div class="admin-list">
+                            <h3>Administrators</h3>
+                            <div class="admin-items">
+                                <div class="admin-item active" onclick="selectAdmin()">
+                                    <div class="admin-info">
+                                        <div class="admin-name">FloodGuard Admin</div>
+                                        <div class="admin-status online">Online</div>
+                                    </div>
+                                    <div class="admin-indicator online"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Interface -->
+                        <div class="chat-interface">
+                            <div class="chat-header">
+                                <div id="selectedAdminName">Chat with FloodGuard Admin</div>
+                            </div>
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="welcome-message">
+                                    <i class="fas fa-comments"></i>
+                                    <p>Messages from administrators will appear here</p>
+                                </div>
+                            </div>
+                            <div class="chat-input-container">
+                                <form id="chatForm" enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="message-input-area">
+                                        <textarea id="messageInput" name="message" placeholder="Type your message to admin..." rows="2"></textarea>
+                                        <div class="chat-actions">
+                                            <label for="imageInput" class="image-btn" title="Send Image">
+                                                <i class="fas fa-image"></i>
+                                                <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
+                                            </label>
+                                            <button type="submit" class="send-btn" title="Send Message">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -674,6 +986,206 @@
                     alert('Error updating availability. Please try again.');
                 });
             });
+
+            // Load chat messages on page load
+            loadChatMessages();
+        });
+
+        // Chat functionality
+        function loadChatMessages() {
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // Show loading state
+            chatMessages.innerHTML = `
+                <div class="welcome-message">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading messages...</p>
+                </div>
+            `;
+
+            // Make AJAX call to load messages
+            fetch('/volunteer/chat/messages')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.messages.length === 0) {
+                            chatMessages.innerHTML = `
+                                <div class="welcome-message">
+                                    <i class="fas fa-comments"></i>
+                                    <p>No messages yet. Administrators can send you messages here.</p>
+                                </div>
+                            `;
+                        } else {
+                            chatMessages.innerHTML = '';
+                            data.messages.forEach(message => {
+                                if (message.image_path) {
+                                    addMessageToChat(
+                                        message.sender_type === 'volunteer' ? 'sent' : 'received',
+                                        null,
+                                        false,
+                                        message.created_at,
+                                        message.image_path
+                                    );
+                                } else {
+                                    addMessageToChat(
+                                        message.sender_type === 'volunteer' ? 'sent' : 'received',
+                                        message.message,
+                                        true,
+                                        message.created_at
+                                    );
+                                }
+                            });
+                        }
+                        // Scroll to bottom
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    } else {
+                        chatMessages.innerHTML = `
+                            <div class="welcome-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error loading messages: ${data.message}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading messages:', error);
+                    chatMessages.innerHTML = `
+                        <div class="welcome-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Error loading messages. Please try again.</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // Handle chat form submission
+        document.getElementById('chatForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const messageInput = document.getElementById('messageInput');
+            const imageInput = document.getElementById('imageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message && !imageInput.files[0]) {
+                return;
+            }
+
+            // Disable form while sending
+            const sendBtn = document.querySelector('.send-btn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            if (message) formData.append('message', message);
+            if (imageInput.files[0]) formData.append('image', imageInput.files[0]);
+
+            // Send message via AJAX
+            fetch('/volunteer/chat/send', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Add message to chat immediately
+                    if (data.chat_message.message) {
+                        addMessageToChat('sent', data.chat_message.message, true, data.chat_message.created_at);
+                    }
+                    if (data.chat_message.image_path) {
+                        addMessageToChat('sent', data.chat_message.image_url, false, data.chat_message.created_at);
+                    }
+                    
+                    // Clear inputs
+                    messageInput.value = '';
+                    imageInput.value = '';
+                    document.querySelector('label[for="imageInput"]').style.background = '#6c757d';
+                    document.querySelector('label[for="imageInput"]').title = 'Send Image';
+                } else {
+                    alert('Error sending message: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                alert('Error sending message. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable form
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            });
+        });
+
+        function addMessageToChat(type, content, isText = true, time = null, imagePath = null) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const currentTime = time || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            if (isText) {
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <div class="message-text">${content}</div>
+                        <div class="message-time">${currentTime}</div>
+                    </div>
+                `;
+            } else {
+                const imageUrl = imagePath ? `/storage/${imagePath}` : content;
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <img src="${imageUrl}" alt="Sent image" class="message-image">
+                        <div class="message-time">${currentTime}</div>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function refreshChatMessages() {
+            const refreshBtn = document.getElementById('refreshChatBtn');
+            const icon = refreshBtn.querySelector('i');
+            
+            icon.classList.add('fa-spin');
+            
+            setTimeout(() => {
+                loadChatMessages();
+                icon.classList.remove('fa-spin');
+            }, 500);
+        }
+
+        // Handle image input change
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            if (e.target.files[0]) {
+                const fileName = e.target.files[0].name;
+                const label = document.querySelector('label[for="imageInput"]');
+                label.title = `Selected: ${fileName}`;
+                label.style.background = '#7a9b8f';
+            }
+        });
+
+        // Select admin function (for volunteer side, there's only one admin to talk to)
+        function selectAdmin() {
+            // Admin is already selected by default - this function exists for consistency
+            // but volunteers only communicate with administrators
+            console.log('Admin selected');
+        }
+
+        // Auto-resize textarea
+        document.getElementById('messageInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        // Allow Enter to send message (Shift+Enter for new line)
+        document.getElementById('messageInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+            }
         });
     </script>
 </body>
