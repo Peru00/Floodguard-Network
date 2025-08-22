@@ -213,6 +213,20 @@
         }
 
         /* Enhanced badge styles for availability */
+        .badge {
+            display: inline-block;
+            padding: 0.4em 0.85em;
+            font-size: 0.8em;
+            font-weight: 600;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            border-radius: 20px; /* More rounded edges */
+            background-color: #6c757d;
+        }
+        
         .badge i {
             margin-right: 4px;
             font-size: 0.8em;
@@ -222,11 +236,34 @@
             background-color: #e8f5e8;
             color: #2d5a27;
             border: 1px solid #c3e6cb;
+            box-shadow: 0 2px 4px rgba(45, 90, 39, 0.1);
         }
 
         .badge.rejected {
             background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
             color: #8b1538;
+            box-shadow: 0 2px 4px rgba(139, 21, 56, 0.1);
+        }
+        
+        .badge.pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            box-shadow: 0 2px 4px rgba(133, 100, 4, 0.1);
+        }
+        
+        .badge.info {
+            background-color: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+            box-shadow: 0 2px 4px rgba(0, 64, 133, 0.1);
+        }
+        
+        .badge.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            box-shadow: 0 2px 4px rgba(133, 100, 4, 0.1);
         }
 
         @keyframes pulse-available {
@@ -713,12 +750,12 @@
                                     <td>{{ $donation->donation_id }}</td>
                                     <td>{{ $donation->user->first_name }} {{ $donation->user->last_name }}</td>
                                     <td>
-                                        <span class="badge @if($donation->donation_type === 'monetary') info @else warning @endif">
+                                        <span class="badge @if($donation->donation_type === 'monetary' || $donation->donation_type === 'money') info @else warning @endif">
                                             {{ ucfirst($donation->donation_type) }}
                                         </span>
                                     </td>
                                     <td>
-                                        @if($donation->donation_type === 'monetary')
+                                        @if($donation->donation_type === 'monetary' || $donation->donation_type === 'money')
                                             ${{ number_format($donation->amount, 2) }}
                                         @else
                                             {{ $donation->quantity }} {{ $donation->items }}
@@ -1293,7 +1330,7 @@
                 id: '{{ $donation->donation_id }}',
                 donorName: '{{ $donation->user->first_name }} {{ $donation->user->last_name }}',
                 type: '{{ ucfirst($donation->donation_type) }}',
-                amount: '@if($donation->donation_type === "monetary")${{ number_format($donation->amount ?? 0, 2) }}@else{{ $donation->quantity ?? 0 }} {{ $donation->items ?? "items" }}@endif',
+                amount: '@if($donation->donation_type === "monetary" || $donation->donation_type === "money")${{ number_format($donation->amount ?? 0, 2) }}@else{{ $donation->quantity ?? 0 }} {{ $donation->items ?? "N/A" }}@endif',
                 date: '{{ \Carbon\Carbon::parse($donation->donation_date)->format("M d, Y") }}',
                 status: '{{ ucfirst($donation->status) }}',
                 paymentMethod: '{{ $donation->payment_method ?? "N/A" }}',
@@ -1323,7 +1360,7 @@
             const paymentInfo = document.getElementById('payment-info');
             const transactionInfo = document.getElementById('transaction-info');
             
-            if (donation.type === 'Monetary') {
+            if (donation.type === 'Monetary' || donation.type === 'Money') {
                 paymentInfo.style.display = 'flex';
                 transactionInfo.style.display = 'flex';
             } else {

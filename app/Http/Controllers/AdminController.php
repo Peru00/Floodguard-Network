@@ -96,13 +96,24 @@ class AdminController extends Controller
             ]);
 
             // If approved and not monetary, add to inventory
-            if ($request->action === 'approve' && $donation->donation_type !== 'monetary') {
+            if ($request->action === 'approve' && $donation->donation_type !== 'monetary' && $donation->donation_type !== 'money') {
                 $inventoryId = 'INV-' . time();
+                
+                // Map donation_type to inventory item_type
+                $itemType = $donation->donation_type;
+                if ($itemType === 'medicine') {
+                    $itemType = 'medical';
+                }
+                
+                // Make sure we have valid values for quantity and items
+                $quantity = !empty($donation->quantity) ? $donation->quantity : 1;
+                $itemName = !empty($donation->items) ? $donation->items : $donation->donation_type;
+                
                 DB::table('inventory')->insert([
                     'inventory_id' => $inventoryId,
-                    'item_type' => $donation->donation_type,
-                    'quantity' => $donation->quantity,
-                    'item_name' => $donation->items,
+                    'item_type' => $itemType,
+                    'quantity' => $quantity,
+                    'item_name' => $itemName,
                     'source_donation_id' => $donation->donation_id,
                     'created_at' => now(),
                     'updated_at' => now()
