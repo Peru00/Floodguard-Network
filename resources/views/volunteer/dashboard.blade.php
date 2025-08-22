@@ -840,13 +840,65 @@
                 </div>
 
                 <div class="tasks-container">
-                    @if(count($tasks) === 0)
+                    @if(count($tasks) === 0 && count($volunteerTasks) === 0)
                         <div class="no-tasks">
                             <i class="fas fa-tasks"></i>
                             <p>You currently have no assigned tasks.</p>
                             <small>New tasks will appear here when assigned by administrators.</small>
                         </div>
                     @else
+                        {{-- Display Volunteer Tasks assigned by Admin --}}
+                        @foreach($volunteerTasks as $task)
+                            <div class="task-card {{ strtolower($task->priority) }}-priority">
+                                <div class="task-header">
+                                    <h3>{{ $task->title }}</h3>
+                                    <span class="badge {{ strtolower($task->priority) }}">{{ ucfirst($task->priority) }} Priority</span>
+                                </div>
+                                <div class="task-details">
+                                    <div class="detail-item">
+                                        <i class="fas fa-calendar-day"></i>
+                                        <span>Assigned: {{ $task->assigned_date ? \Carbon\Carbon::parse($task->assigned_date)->format('l, F j, Y') : 'Not specified' }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Due: {{ $task->due_date ? \Carbon\Carbon::parse($task->due_date)->format('M j, Y g:i A') : 'No due date' }}</span>
+                                    </div>
+                                    @if($task->location)
+                                    <div class="detail-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>{{ $task->location }}</span>
+                                    </div>
+                                    @endif
+                                    <div class="detail-item">
+                                        <i class="fas fa-tag"></i>
+                                        <span>{{ ucfirst(str_replace('_', ' ', $task->task_type)) }}</span>
+                                    </div>
+                                    @if($task->assignedBy)
+                                    <div class="detail-item">
+                                        <i class="fas fa-user-shield"></i>
+                                        <span>Assigned by: {{ $task->assignedBy->first_name }} {{ $task->assignedBy->last_name }}</span>
+                                    </div>
+                                    @endif
+                                </div>
+                                <div class="task-description">
+                                    <p><strong>Description:</strong> {{ $task->description }}</p>
+                                    @if($task->notes)
+                                        <p><strong>Additional Notes:</strong> {{ $task->notes }}</p>
+                                    @endif
+                                </div>
+                                <div class="task-actions">
+                                    <form method="POST" action="{{ route('volunteer.complete-volunteer-task') }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to mark this task as completed? This action cannot be undone.')">
+                                        @csrf
+                                        <input type="hidden" name="task_id" value="{{ $task->task_id }}">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-check"></i> Mark as Completed
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        {{-- Display Distribution Tasks (Legacy) --}}
                         @foreach($tasks as $task)
                             <div class="task-card {{ strtolower($task->priority) }}-priority">
                                 <div class="task-header">

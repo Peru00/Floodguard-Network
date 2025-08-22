@@ -1,3 +1,6 @@
+@php
+use Illuminate\Support\Str;
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,10 +73,11 @@
                                 <tr>
                                     <th>Distribution ID</th>
                                     <th>Date & Time</th>
-                                    <th>Beneficiary</th>
+                                    <th>Task Title</th>
+                                    <th>Task Type</th>
+                                    <th>Beneficiary/Location</th>
                                     <th>Relief Type</th>
                                     <th>Quantity</th>
-                                    <th>Location</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -90,27 +94,53 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <i class="fas fa-user-injured" style="color: var(--primary-color);"></i>
-                                            <strong>{{ $distribution->victim_name }}</strong>
+                                        <div>
+                                            <strong>{{ $distribution->task_title ?? 'Relief Distribution' }}</strong>
+                                            @if($distribution->task_description)
+                                                <br><small style="color: #666;">{{ Str::limit($distribution->task_description, 50) }}</small>
+                                            @endif
                                         </div>
                                     </td>
                                     <td>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <i class="fas fa-box" style="color: var(--secondary-color);"></i>
-                                            {{ $distribution->relief_type }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge" style="background-color: rgba(76, 175, 80, 0.1); color: var(--success-color);">
-                                            {{ $distribution->quantity }} units
+                                        <span class="badge" style="background-color: rgba(52, 152, 219, 0.1); color: var(--primary-color);">
+                                            {{ $distribution->task_type ? ucfirst(str_replace('_', ' ', $distribution->task_type)) : 'Distribution' }}
                                         </span>
                                     </td>
                                     <td>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <i class="fas fa-map-marker-alt" style="color: var(--warning-color);"></i>
-                                            {{ $distribution->location }}
-                                        </div>
+                                        @if($distribution->victim_name)
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="fas fa-user-injured" style="color: var(--primary-color);"></i>
+                                                <strong>{{ $distribution->victim_name }}</strong>
+                                            </div>
+                                            <small style="color: #666;">{{ $distribution->location }}</small>
+                                        @else
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="fas fa-map-marker-alt" style="color: var(--warning-color);"></i>
+                                                {{ $distribution->location }}
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($distribution->item_name)
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="fas fa-box" style="color: var(--secondary-color);"></i>
+                                                {{ $distribution->item_name }}
+                                            </div>
+                                            @if($distribution->item_type)
+                                                <small style="color: #666;">({{ ucfirst($distribution->item_type) }})</small>
+                                            @endif
+                                        @else
+                                            <span style="color: #999; font-style: italic;">No inventory</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($distribution->quantity)
+                                            <span class="badge" style="background-color: rgba(76, 175, 80, 0.1); color: var(--success-color);">
+                                                {{ $distribution->quantity }} units
+                                            </span>
+                                        @else
+                                            <span style="color: #999;">-</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <span class="badge completed">

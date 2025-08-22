@@ -56,10 +56,15 @@ class VolunteerController extends Controller
                 ->where('volunteer_id', $user->user_id)
                 ->where('status', '!=', 'completed')
                 ->orderBy('priority', 'desc')
+                ->orderByRaw("CASE 
+                    WHEN priority = 'high' THEN 1 
+                    WHEN priority = 'medium' THEN 2 
+                    WHEN priority = 'low' THEN 3 
+                    ELSE 4 END")
                 ->orderBy('due_date', 'asc')
                 ->get();
 
-            // Combine both types of tasks
+            // Combine both types of tasks - keep distribution tasks for backward compatibility
             $tasks = $distributionTasks;
             
             // Get completed distributions count
@@ -179,6 +184,107 @@ class VolunteerController extends Controller
         }
     }
     
+    public function completeVolunteerTask(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'volunteer') {
+            return redirect()->route('volunteer.dashboard')->with('error', 'Unauthorized access');
+        }
+        
+        $request->validate([
+            'task_id' => 'required|string'
+        ]);
+        
+        DB::beginTransaction();
+        try {
+            $taskId = $request->task_id;
+            
+            // Get the volunteer task
+            $task = VolunteerTask::where('task_id', $taskId)
+                ->where('volunteer_id', $user->user_id)
+                ->where('status', 'pending')
+                ->first();
+            
+            if (!$task) {
+                return redirect()->route('volunteer.dashboard')->with('error', 'Task not found or already completed');
+            }
+            
+            // Create distribution record
+            $distributionId = 'DIST-' . time() . '-' . strtoupper(substr(md5($task->task_id), 0, 6));
+            
+            // Determine inventory item for the task
+            $inventoryId = null;
+            $quantity = 1; // Default quantity
+            
+            // If it's a relief distribution task, try to find appropriate inventory
+            if ($task->task_type === 'relief_distribution') {
+                // Look for available inventory items
+                $availableInventory = DB::table('inventory')
+                    ->where('status', 'available')
+                    ->where('quantity', '>', 0)
+                    ->first();
+                
+                if ($availableInventory) {
+                    $inventoryId = $availableInventory->inventory_id;
+                    $quantity = min(1, $availableInventory->quantity); // Take 1 unit or available quantity
+                }
+            }
+            
+            // Create distribution record
+            DB::table('distribution_records')->insert([
+                'distribution_id' => $distributionId,
+                'distribution_date' => now(),
+                'volunteer_id' => $user->user_id,
+                'victim_id' => $task->victim_id, // Will be null for non-victim tasks
+                'inventory_id' => $inventoryId, // Will be null for non-inventory tasks
+                'location' => $task->location ?? 'Not specified',
+                'quantity' => $quantity,
+                'task_type' => $task->task_type,
+                'task_title' => $task->title,
+                'task_description' => $task->description,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            
+            // Update inventory if applicable
+            if ($inventoryId && $task->task_type === 'relief_distribution') {
+                DB::table('inventory')
+                    ->where('inventory_id', $inventoryId)
+                    ->decrement('quantity', $quantity);
+            }
+            
+            // Update victim status if applicable
+            if ($task->victim_id) {
+                DB::table('victims')
+                    ->where('victim_id', $task->victim_id)
+                    ->update([
+                        'status' => 'assisted',
+                        'updated_at' => now()
+                    ]);
+            }
+            
+            // Update task status to completed
+            $task->update([
+                'status' => 'completed',
+                'completed_date' => now()
+            ]);
+            
+            // Update volunteer profile - increment people helped
+            DB::table('volunteer_profiles')
+                ->where('volunteer_id', $user->user_id)
+                ->increment('people_helped');
+            
+            DB::commit();
+            return redirect()->route('volunteer.dashboard')->with('success', 'Task completed successfully! Distribution record has been created.');
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Log::error('Error completing volunteer task', ['error' => $e->getMessage()]);
+            return redirect()->route('volunteer.dashboard')->with('error', 'Error completing task: ' . $e->getMessage());
+        }
+    }
+    
     public function editProfile()
     {
         $user = Auth::user();
@@ -249,13 +355,15 @@ class VolunteerController extends Controller
         
         // Get distribution records for this volunteer
         $distributions = DB::table('distribution_records as dr')
-            ->join('victims as v', 'dr.victim_id', '=', 'v.victim_id')
-            ->join('inventory as i', 'dr.inventory_id', '=', 'i.inventory_id')
+            ->leftJoin('victims as v', 'dr.victim_id', '=', 'v.victim_id')
+            ->leftJoin('inventory as i', 'dr.inventory_id', '=', 'i.inventory_id')
             ->where('dr.volunteer_id', $user->user_id)
             ->select(
                 'dr.*',
                 'v.name as victim_name',
-                'i.item_name as relief_type'
+                'v.location',
+                'i.item_name',
+                'i.item_type'
             )
             ->orderBy('dr.distribution_date', 'desc')
             ->paginate(15);

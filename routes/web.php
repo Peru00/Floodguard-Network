@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\VolunteerController::class, 'dashboard'])->name('dashboard');
         Route::post('/toggle-availability', [App\Http\Controllers\VolunteerController::class, 'toggleAvailability'])->name('toggle-availability');
         Route::post('/complete-task', [App\Http\Controllers\VolunteerController::class, 'completeTask'])->name('complete-task');
+        Route::post('/complete-volunteer-task', [App\Http\Controllers\VolunteerController::class, 'completeVolunteerTask'])->name('complete-volunteer-task');
         Route::get('/profile/edit', [App\Http\Controllers\VolunteerController::class, 'editProfile'])->name('edit-profile');
         Route::post('/profile/update', [App\Http\Controllers\VolunteerController::class, 'updateProfile'])->name('update-profile');
         Route::get('/relief-camps', [App\Http\Controllers\VolunteerController::class, 'reliefCamps'])->name('relief-camps');
