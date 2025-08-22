@@ -293,7 +293,7 @@
                                 </td>
                                 <td>
                                     @if($donation->donation_type === 'money')
-                                        <strong>${{ number_format($donation->amount, 2) }}</strong>
+                                        <strong>৳{{ number_format($donation->amount, 2) }}</strong>
                                         @if($donation->payment_method)
                                             <br><small>via {{ ucfirst($donation->payment_method) }}</small>
                                         @endif

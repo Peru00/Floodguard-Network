@@ -215,7 +215,7 @@
                         <i class="fas fa-money-bill-wave"></i>
                         <div>
                             <span>Total Amount</span>
-                            <strong>${{ number_format($totalAmount ?? 0, 2) }}</strong>
+                            <strong>৳{{ number_format($totalAmount ?? 0, 2) }}</strong>
                         </div>
                     </div>
                     <div class="stat-item">
@@ -261,7 +261,7 @@
                 <div id="moneyFields" class="conditional-block active">
                     <div class="inline-fields">
                         <div class="form-group">
-                            <label>Amount (USD) *</label>
+                            <label>Amount (BDT) *</label>
                             <input type="number" step="0.01" name="money_amount" placeholder="e.g. 150" required />
                         </div>
                         <div class="form-group">
@@ -331,7 +331,7 @@
                         </div>
                         <div class="notification-message">
                             @if($donation->donation_type === 'money')
-                                Monetary donation of ${{ number_format($donation->amount,2) }}.
+                                Monetary donation of ৳{{ number_format($donation->amount,2) }}.
                             @else
                                 {{ ucfirst($donation->donation_type) }} donation: {{ $donation->description }} (Qty: {{ $donation->quantity }}).
                             @endif

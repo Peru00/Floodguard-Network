@@ -8,10 +8,16 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Override body background for login page */
+        body {
+            background: white !important;
+            min-height: 100vh;
+        }
+        
         /* Login/Signup Section */
         .auth-section {
-            padding: 5rem 5%;
-            min-height: 80vh;
+            padding: 0 5%;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -120,24 +126,6 @@
     </style>
 </head>
 <body>
-    <!-- Header with Navigation -->
-    <header>
-        <nav class="navbar glass">
-            <div class="logo">
-                <i class="fas fa-hands-helping"></i>
-                <h1>Floodguard Network</h1>
-            </div>
-            <ul class="nav-links">
-                <li><a href="{{ route('home') }}">Home</a></li>
-                <li><a href="{{ route('login') }}" class="active">Login/Signup</a></li>
-                <li><a href="{{ route('admin.dashboard') }}">Admin Dashboard</a></li>
-                <li><a href="#">Volunteer Dashboard</a></li>
-                <li><a href="{{ route('donor.dashboard') }}">Donor Dashboard</a></li>
-                <li><a href="{{ route('home') }}#emergency-contact">Emergency Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-
     <!-- Login Section -->
     <section id="login-section" class="auth-section">
         <div class="auth-container">
@@ -155,6 +143,12 @@
                                 {{ $error }}<br>
                             @endforeach
                         @endif
+                    </div>
+                @endif
+
+                @if(session('status'))
+                    <div style="background-color: #d4edda; color: #155724; padding: 10px 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+                        <i class="fas fa-check-circle"></i> {{ session('status') }}
                     </div>
                 @endif
 
@@ -178,22 +172,16 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="login-role">Role</label>
-                        <select id="login-role" name="role" required>
-                            <option value="">Select Role</option>
-                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="volunteer" {{ old('role') == 'volunteer' ? 'selected' : '' }}>Volunteer</option>
-                            <option value="donor" {{ old('role') == 'donor' ? 'selected' : '' }}>Donor</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" placeholder="Enter your password" required>
                     </div>
                     
                     <div class="submit-container">
                         <button type="submit" class="btn-submit">Login</button>
+                    </div>
+                    
+                    <div class="toggle-auth">
+                        <a href="{{ route('forgot-password') }}">Forgot Password?</a>
                     </div>
                     
                     <div class="toggle-auth">

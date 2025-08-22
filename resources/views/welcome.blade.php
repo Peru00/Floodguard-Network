@@ -81,14 +81,7 @@
                 <i class="fas fa-hands-helping"></i>
                 <h1>Floodguard Network</h1>
             </div>
-            <ul class="nav-links">
-                <li><a href="/" class="active">Home</a></li>
-                <li><a href="/login">Login/Signup</a></li>
-                <li><a href="#">Admin Dashboard</a></li>
-                <li><a href="#">Volunteer Dashboard</a></li>
-                <li><a href="#">Donor Dashboard</a></li>
-                <li><a href="#emergency-contact">Emergency Contact</a></li>
-            </ul>
+            
         </nav>
     </header>
 
@@ -108,7 +101,7 @@
             <div class="hero-content glass">
                 <h2>Connecting Help with Need</h2>
                 <p>A comprehensive flood relief distribution system ensuring efficient aid delivery to affected communities</p>
-                <a href="/about" class="cta-button">Get Involved</a>
+                <a href="{{ route('login') }}" class="cta-button">Get Involved</a>
             </div>
         </section>
 

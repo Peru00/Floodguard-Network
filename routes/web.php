@@ -16,6 +16,12 @@ Route::get('/signup', [AuthController::class, 'showSignup'])->name('signup');
 Route::post('/signup', [AuthController::class, 'signup'])->name('signup.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Password Reset routes
+Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('forgot-password');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
 // Protected routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
@@ -45,6 +51,22 @@ Route::middleware('auth')->group(function () {
         Route::post('/add-victim', [AdminController::class, 'addVictim'])->name('add-victim');
         Route::post('/add-volunteer', [AdminController::class, 'addVolunteer'])->name('add-volunteer');
         Route::post('/assign-task', [AdminController::class, 'assignTask'])->name('assign-task');
+        
+        // Inventory routes
+        Route::get('/inventory', [AdminController::class, 'inventory'])->name('inventory');
+        Route::post('/inventory', [AdminController::class, 'storeInventory'])->name('inventory.store');
+        Route::put('/inventory/{id}', [AdminController::class, 'updateInventory'])->name('inventory.update');
+        Route::delete('/inventory/{id}', [AdminController::class, 'deleteInventory'])->name('inventory.delete');
+        
+        // Donations routes
+        Route::get('/donations', [AdminController::class, 'donations'])->name('donations');
+        Route::post('/donations/{id}/approve', [AdminController::class, 'approveDonation'])->name('donations.approve');
+        Route::post('/donations/{id}/reject', [AdminController::class, 'rejectDonation'])->name('donations.reject');
+        
+        // Distribution Repository routes
+        Route::get('/distribution-repo', [AdminController::class, 'distributionRepo'])->name('distribution-repo');
+        Route::post('/distribution-repo', [AdminController::class, 'storeDistribution'])->name('distribution-repo.store');
+        Route::get('/distribution-repo/export', [AdminController::class, 'exportDistributions'])->name('distribution-repo.export');
     });
     
     // Donor routes

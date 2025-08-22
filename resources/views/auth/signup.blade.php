@@ -7,10 +7,16 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Override body background for signup page */
+        body {
+            background: white !important;
+            min-height: 100vh;
+        }
+        
         /* Login/Signup Section */
         .auth-section {
-            padding: 5rem 5%;
-            min-height: 80vh;
+            padding: 0 5%;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -121,24 +127,6 @@
     </style>
 </head>
 <body>
-    <!-- Header with Navigation -->
-    <header>
-        <nav class="navbar glass">
-            <div class="logo">
-                <i class="fas fa-hands-helping"></i>
-                <h1>Floodguard Network</h1>
-            </div>
-            <ul class="nav-links">
-                <li><a href="{{ route('home') }}">Home</a></li>
-                <li><a href="{{ route('login') }}" class="active">Login/Signup</a></li>
-                <li><a href="#">Admin Dashboard</a></li>
-                <li><a href="#">Volunteer Dashboard</a></li>
-                <li><a href="#">Donor Dashboard</a></li>
-                <li><a href="{{ route('home') }}#emergency-contact">Emergency Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-
     <!-- Signup Section -->
     <section id="signup-section" class="auth-section">
         <div class="auth-container">
